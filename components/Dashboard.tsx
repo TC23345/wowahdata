@@ -178,23 +178,6 @@ function ReadyView({
 
   return (
     <div className="flex flex-col gap-5">
-      <StatusBar
-        data={data}
-        realms={realms}
-        onSwitchRealm={onSwitchRealm}
-        onUploadMore={() => setShowUpload(true)}
-        onClear={onClear}
-      />
-
-      {showUpload && (
-        <UploadZone
-          onLoaded={(d) => {
-            onLoaded(d);
-            setShowUpload(false);
-          }}
-        />
-      )}
-
       <section className="flex flex-col gap-4 rounded-lg border border-[#333] bg-[#1a1a1a] p-4">
         <div className="flex flex-col gap-2">
           <span className="text-[10px] font-medium uppercase tracking-wide text-[#666]">
@@ -286,6 +269,25 @@ function ReadyView({
       {tab === "sellthrough" && (
         <SellThroughPanel data={data} activeItem={item} />
       )}
+
+      {showUpload && (
+        <UploadZone
+          onLoaded={(d) => {
+            onLoaded(d);
+            setShowUpload(false);
+          }}
+        />
+      )}
+
+      <footer className="mt-4 border-t border-[#252525] pt-4">
+        <StatusBar
+          data={data}
+          realms={realms}
+          onSwitchRealm={onSwitchRealm}
+          onUploadMore={() => setShowUpload(true)}
+          onClear={onClear}
+        />
+      </footer>
     </div>
   );
 }
@@ -368,7 +370,7 @@ function StatusBar({
         {menuOpen && (
           <div
             role="menu"
-            className="absolute right-0 z-20 mt-1 w-48 overflow-hidden rounded-md border border-[#333] bg-[#1a1a1a] shadow-xl"
+            className="absolute bottom-full right-0 z-20 mb-1 w-48 overflow-hidden rounded-md border border-[#333] bg-[#1a1a1a] shadow-xl"
           >
             <button
               type="button"
