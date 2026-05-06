@@ -1,10 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { LoadedData, PurchaseSaleRow } from "@/lib/csv";
-import { aggregateItems, filterByDisplayName } from "@/lib/items";
+import type { LoadedData } from "@/lib/csv";
+import {
+  aggregateItems,
+  filterByDisplayName,
+} from "@/lib/items";
 import { weekStartTuesday, weekEndMonday } from "@/lib/weeks";
 import { CURATED_ITEMS, DEFAULT_ITEM } from "@/lib/curated";
+import { filterForItem, statsForItem } from "@/lib/transform";
 import { SaleHeatmap } from "@/components/heatmap/SaleHeatmap";
 import { ItemSelector } from "@/components/controls/ItemSelector";
 import {
@@ -12,6 +16,10 @@ import {
   type RangeSelection,
 } from "@/components/controls/DateRangeTabs";
 import { UploadZone } from "@/components/UploadZone";
+import { StatCards } from "@/components/StatCards";
+import { ScatterChart } from "@/components/charts/ScatterChart";
+import { DailyPnLChart } from "@/components/charts/DailyPnLChart";
+import { PriceDistributionChart } from "@/components/charts/PriceDistributionChart";
 import { useDashboardParams } from "@/hooks/useDashboardParams";
 import {
   clearAllData,
@@ -27,11 +35,19 @@ type LoadState =
   | { kind: "empty" }
   | { kind: "ready"; data: LoadedData; realms: string[] };
 
+type Tab = "heatmap" | "scatter" | "pnl" | "histogram";
+const TAB_LABELS: Record<Tab, string> = {
+  heatmap: "Heatmap",
+  scatter: "Scatter",
+  pnl: "P&L",
+  histogram: "Histogram",
+};
+const TABS: Tab[] = ["heatmap", "scatter", "pnl", "histogram"];
+
 export function Dashboard() {
   const [state, setState] = useState<LoadState>({ kind: "boot" });
   const { params, setParams } = useDashboardParams();
 
-  // Hydrate from IndexedDB on first render.
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -72,7 +88,7 @@ export function Dashboard() {
     if (!confirm("Clear all loaded TSM data from this browser?")) return;
     await clearAllData();
     setState({ kind: "empty" });
-    setParams({ item: null, range: null, start: null, end: null });
+    setParams({ item: null, range: null, start: null, end: null, tab: null });
   }, [setParams]);
 
   if (state.kind === "boot") {
@@ -120,10 +136,12 @@ function ReadyView({
   const { fullStart, fullEnd } = useMemo(() => {
     let min = Infinity;
     let max = -Infinity;
-    for (const r of data.sales) {
-      if (r.time < min) min = r.time;
-      if (r.time > max) max = r.time;
-    }
+    const consider = (t: number) => {
+      if (t < min) min = t;
+      if (t > max) max = t;
+    };
+    for (const r of data.sales) consider(r.time);
+    for (const r of data.purchases) consider(r.time);
     if (!Number.isFinite(min)) {
       const now = new Date();
       return { fullStart: now, fullEnd: now };
@@ -135,24 +153,24 @@ function ReadyView({
   }, [data]);
 
   const item = isKnownItem(items, params.item) ? params.item! : DEFAULT_ITEM;
-  const range = parseRange(params, fullStart, fullEnd);
+  const range = parseRange(params);
+  const tab: Tab = isTab(params.tab) ? (params.tab as Tab) : "heatmap";
 
   const filtered = useMemo(() => {
-    const itemRows = filterByDisplayName(data.sales, item) as PurchaseSaleRow[];
-    if (range.kind === "all") return itemRows;
-    const startMs =
-      range.kind === "week"
-        ? range.weekStart.getTime()
-        : range.start.getTime();
-    const endMs =
-      range.kind === "week"
-        ? weekEndMonday(range.weekStart).getTime()
-        : range.end.getTime();
-    return itemRows.filter((r) => {
-      const t = r.time * 1000;
-      return t >= startMs && t <= endMs;
-    });
+    const dateRange =
+      range.kind === "all"
+        ? undefined
+        : range.kind === "week"
+          ? {
+              start: range.weekStart,
+              end: weekEndMonday(range.weekStart),
+            }
+          : { start: range.start, end: range.end };
+    return filterForItem(data, item, dateRange);
   }, [data, item, range]);
+
+  const stats = useMemo(() => statsForItem(filtered), [filtered]);
+  const itemSales = useMemo(() => filterByDisplayName(filtered.sales, item), [filtered.sales, item]);
 
   return (
     <div className="flex flex-col gap-5">
@@ -178,7 +196,7 @@ function ReadyView({
           </span>
           <span>
             Loaded {new Date(data.loadedAt).toLocaleString()} ·{" "}
-            {data.sales.length.toLocaleString()} sales rows
+            {data.sales.length.toLocaleString()} sales · {data.purchases.length.toLocaleString()} buys
           </span>
         </div>
         <div className="flex gap-2">
@@ -199,7 +217,9 @@ function ReadyView({
         </div>
       </div>
 
-      {showUpload && <UploadZone onLoaded={(d) => { onLoaded(d); setShowUpload(false); }} />}
+      {showUpload && (
+        <UploadZone onLoaded={(d) => { onLoaded(d); setShowUpload(false); }} />
+      )}
 
       <div className="flex flex-wrap items-end gap-4">
         <Field label="Item">
@@ -237,7 +257,49 @@ function ReadyView({
         </Field>
       </div>
 
-      <SaleHeatmap rows={filtered} itemName={item} />
+      <StatCards stats={stats} />
+
+      <div
+        role="tablist"
+        className="flex gap-1 border-b border-[#333] text-xs"
+      >
+        {TABS.map((t) => (
+          <button
+            key={t}
+            role="tab"
+            aria-selected={t === tab}
+            onClick={() => setParams({ tab: t === "heatmap" ? null : t })}
+            className={`rounded-t px-3 py-1.5 transition-colors ${
+              t === tab
+                ? "border-b-2 border-[#5dcaa5] bg-[#252525] text-[#e0e0e0]"
+                : "text-[#999] hover:text-[#e0e0e0]"
+            }`}
+          >
+            {TAB_LABELS[t]}
+          </button>
+        ))}
+      </div>
+
+      {tab === "heatmap" && <SaleHeatmap rows={itemSales} itemName={item} />}
+      {tab === "scatter" && (
+        <ScatterChart buys={filtered.purchases} sells={filtered.sales} itemName={item} />
+      )}
+      {tab === "pnl" && (
+        <DailyPnLChart
+          buys={filtered.purchases}
+          sells={filtered.sales}
+          expired={filtered.expired}
+          canceled={filtered.canceled}
+          itemName={item}
+        />
+      )}
+      {tab === "histogram" && (
+        <PriceDistributionChart
+          buys={filtered.purchases}
+          sells={filtered.sales}
+          itemName={item}
+        />
+      )}
     </div>
   );
 }
@@ -262,10 +324,12 @@ function isKnownItem(
   return items.some((i) => i.name === name);
 }
 
+function isTab(v: string | null): boolean {
+  return v === "heatmap" || v === "scatter" || v === "pnl" || v === "histogram";
+}
+
 function parseRange(
   params: ReturnType<typeof useDashboardParams>["params"],
-  fullStart: Date,
-  fullEnd: Date,
 ): RangeSelection {
   if (params.range?.startsWith("week:")) {
     const iso = params.range.slice("week:".length);
@@ -281,8 +345,6 @@ function parseRange(
       return { kind: "custom", start: s, end: e };
     }
   }
-  void fullStart;
-  void fullEnd;
   return { kind: "all" };
 }
 
