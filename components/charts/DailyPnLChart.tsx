@@ -103,7 +103,7 @@ export function DailyPnLChart({ buys, sells, expired, canceled, itemName }: Prop
           {series.length} day{series.length === 1 ? "" : "s"} of activity
         </p>
       </header>
-      <div className="h-[360px]">
+      <div className="h-[clamp(360px,50vh,640px)]">
         <Chart type="bar" data={chartData} options={options} />
       </div>
     </div>

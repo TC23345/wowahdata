@@ -77,7 +77,7 @@ export function PriceDistributionChart({ buys, sells, itemName }: Props) {
           Spread between buy floor and sell ceiling for {itemName}
         </p>
       </header>
-      <div className="h-[320px]">
+      <div className="h-[clamp(320px,45vh,560px)]">
         <Chart type="bar" data={chartData} options={options} />
       </div>
     </div>

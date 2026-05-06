@@ -76,9 +76,9 @@ export function SaleHeatmap({ rows, itemName }: Props) {
           role="grid"
           aria-rowcount={8}
           aria-colcount={25}
-          className="inline-grid gap-px text-[10px] text-[#999]"
+          className="grid w-full min-w-[640px] gap-0.5 text-xs text-[#999]"
           style={{
-            gridTemplateColumns: "32px repeat(24, minmax(22px, 1fr))",
+            gridTemplateColumns: "44px repeat(24, minmax(0, 1fr))",
           }}
         >
           <div role="columnheader" />
@@ -86,7 +86,7 @@ export function SaleHeatmap({ rows, itemName }: Props) {
             <div
               key={`hh-${h}`}
               role="columnheader"
-              className="text-center tabular-nums"
+              className="pb-1 text-center text-[11px] tabular-nums"
             >
               {h % 3 === 0 ? String(h).padStart(2, "0") : ""}
             </div>
@@ -146,7 +146,10 @@ function DayRow({
 }) {
   return (
     <>
-      <div role="rowheader" className="pr-2 text-right text-[#999]">
+      <div
+        role="rowheader"
+        className="flex items-center justify-end pr-3 text-right text-xs font-medium text-[#999]"
+      >
         {day}
       </div>
       {cells.map((cell, h) => {
@@ -162,7 +165,7 @@ function DayRow({
             onMouseLeave={onLeave}
             onFocus={() => onHover(h)}
             onBlur={onLeave}
-            className={`h-5 w-full rounded-[2px] outline-none transition-shadow ${
+            className={`aspect-[3/2] w-full rounded-[3px] outline-none transition-shadow md:aspect-[5/3] ${
               isHovered(h) ? "ring-1 ring-white/70" : ""
             }`}
             style={{ background: bg }}
