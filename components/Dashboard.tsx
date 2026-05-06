@@ -20,6 +20,8 @@ import { StatCards } from "@/components/StatCards";
 import { ScatterChart } from "@/components/charts/ScatterChart";
 import { DailyPnLChart } from "@/components/charts/DailyPnLChart";
 import { PriceDistributionChart } from "@/components/charts/PriceDistributionChart";
+import { CashFlowPanel } from "@/components/panels/CashFlowPanel";
+import { SellThroughPanel } from "@/components/panels/SellThroughPanel";
 import { useDashboardParams } from "@/hooks/useDashboardParams";
 import {
   clearAllData,
@@ -35,14 +37,19 @@ type LoadState =
   | { kind: "empty" }
   | { kind: "ready"; data: LoadedData; realms: string[] };
 
-type Tab = "heatmap" | "scatter" | "pnl" | "histogram";
+type Tab = "heatmap" | "scatter" | "pnl" | "histogram" | "cashflow" | "sellthrough";
 const TAB_LABELS: Record<Tab, string> = {
   heatmap: "Heatmap",
   scatter: "Scatter",
   pnl: "P&L",
   histogram: "Histogram",
+  cashflow: "Cash flow",
+  sellthrough: "Sell-through",
 };
-const TABS: Tab[] = ["heatmap", "scatter", "pnl", "histogram"];
+const TABS: Tab[] = ["heatmap", "scatter", "pnl", "histogram", "cashflow", "sellthrough"];
+
+// Tabs that aggregate across the whole dataset (item filter doesn't apply).
+const ACROSS_ALL = new Set<Tab>(["cashflow", "sellthrough"]);
 
 export function Dashboard() {
   const [state, setState] = useState<LoadState>({ kind: "boot" });
@@ -300,6 +307,12 @@ function ReadyView({
           itemName={item}
         />
       )}
+      {tab === "cashflow" && (
+        <CashFlowPanel income={filtered.income} expenses={filtered.expenses} />
+      )}
+      {tab === "sellthrough" && (
+        <SellThroughPanel data={data} activeItem={item} />
+      )}
     </div>
   );
 }
@@ -325,7 +338,7 @@ function isKnownItem(
 }
 
 function isTab(v: string | null): boolean {
-  return v === "heatmap" || v === "scatter" || v === "pnl" || v === "histogram";
+  return TABS.includes(v as Tab);
 }
 
 function parseRange(
