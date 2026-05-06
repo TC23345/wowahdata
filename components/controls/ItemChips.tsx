@@ -46,6 +46,7 @@ export function ItemChips({ items, value, onChange }: Props) {
 
   return (
     <div className="flex flex-wrap items-center gap-1.5">
+      <ItemSearchInput items={items} value={value} onChange={onChange} />
       {visibleChips.map((item) => (
         <Chip
           key={item.name}
@@ -64,7 +65,6 @@ export function ItemChips({ items, value, onChange }: Props) {
           showCuratedBadge={!isCurated(activePinned.name)}
         />
       )}
-      <ItemSearchInput items={items} value={value} onChange={onChange} />
     </div>
   );
 }
@@ -201,7 +201,7 @@ function ItemSearchInput({
       {open && results.length > 0 && (
         <ul
           role="listbox"
-          className="absolute right-0 z-20 mt-2 max-h-72 w-72 overflow-auto rounded-md border border-[#333] bg-[#1a1a1a] shadow-xl"
+          className="absolute left-0 z-20 mt-2 max-h-72 w-72 overflow-auto rounded-md border border-[#333] bg-[#1a1a1a] shadow-xl"
         >
           {results.map((i) => (
             <li key={i.name}>
@@ -226,7 +226,7 @@ function ItemSearchInput({
         </ul>
       )}
       {open && query.trim() && results.length === 0 && (
-        <div className="absolute right-0 z-20 mt-2 w-72 rounded-md border border-[#333] bg-[#1a1a1a] px-3 py-3 text-center text-xs text-[#666] shadow-xl">
+        <div className="absolute left-0 z-20 mt-2 w-72 rounded-md border border-[#333] bg-[#1a1a1a] px-3 py-3 text-center text-xs text-[#666] shadow-xl">
           No items match "{query}".
         </div>
       )}

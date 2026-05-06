@@ -9,13 +9,18 @@ function fmtGold(g: number, signed = false): string {
   return `${sign}${g.toFixed(2)}g`;
 }
 
+function fmtGoldFull(g: number, signed = false): string {
+  const sign = signed && g > 0 ? "+" : "";
+  return `${sign}${Math.round(g).toLocaleString()}g`;
+}
+
 export function StatCards({ stats }: { stats: ItemStats }) {
   const pnlPositive = stats.netPnlGold >= 0;
   return (
     <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
       <Card
         label="Net P&L"
-        value={fmtGold(stats.netPnlGold, true)}
+        value={fmtGoldFull(stats.netPnlGold, true)}
         sub="revenue − cost"
         valueClass={
           pnlPositive ? "text-[#5dcaa5]" : "text-[#e24b4a]"
