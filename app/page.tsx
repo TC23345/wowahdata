@@ -1,14 +1,23 @@
-import { SaleHeatmap } from "@/components/heatmap/SaleHeatmap";
+import { Suspense } from "react";
+import { Dashboard } from "@/components/Dashboard";
 import { getSampleData } from "@/lib/sample-data";
-import { filterByDisplayName } from "@/lib/items";
+import { aggregateItems } from "@/lib/items";
 
 export const dynamic = "force-static";
 
-const HARDCODED_ITEM = "Arcane Dust";
-
 export default function Home() {
   const data = getSampleData();
-  const itemSales = filterByDisplayName(data.sales, HARDCODED_ITEM);
+  const items = aggregateItems(data);
+
+  // Date range is computed from the sales rows alone — heatmap is sales-only.
+  let minTime = Infinity;
+  let maxTime = -Infinity;
+  for (const r of data.sales) {
+    if (r.time < minTime) minTime = r.time;
+    if (r.time > maxTime) maxTime = r.time;
+  }
+  const fullStart = new Date(minTime * 1000);
+  const fullEnd = new Date(maxTime * 1000);
 
   return (
     <main className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 sm:px-8">
@@ -17,20 +26,25 @@ export default function Home() {
           wowahdata
         </h1>
         <p className="text-sm text-[#999]">
-          When does your AH actually clear? Sample data: Nightslayer ·{" "}
+          When does your AH actually clear? Sample: {data.realm} ·{" "}
           {data.sales.length.toLocaleString()} sales rows ·{" "}
-          {new Date(data.sales[0].time * 1000).toLocaleDateString()}–
-          {new Date(
-            data.sales[data.sales.length - 1].time * 1000,
-          ).toLocaleDateString()}
+          {fullStart.toLocaleDateString()} – {fullEnd.toLocaleDateString()}
         </p>
       </header>
 
-      <SaleHeatmap rows={itemSales} itemName={HARDCODED_ITEM} />
+      <Suspense fallback={<p className="text-sm text-[#666]">Loading…</p>}>
+        <Dashboard
+          sales={data.sales}
+          items={items}
+          fullStartIso={fullStart.toISOString()}
+          fullEndIso={fullEnd.toISOString()}
+          realm={data.realm}
+        />
+      </Suspense>
 
       <p className="text-xs text-[#666]">
-        Hero view: per-item sale heatmap. Item selector, date-range tabs,
-        upload zone, and secondary charts arrive in subsequent phases.
+        Upload zone, IndexedDB persistence, and secondary charts arrive in
+        subsequent phases.
       </p>
     </main>
   );
