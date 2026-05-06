@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { LoadedData } from "@/lib/csv";
 import {
   aggregateItems,
@@ -10,11 +10,11 @@ import { weekStartTuesday, weekEndMonday } from "@/lib/weeks";
 import { CURATED_ITEMS, DEFAULT_ITEM } from "@/lib/curated";
 import { filterForItem, statsForItem } from "@/lib/transform";
 import { SaleHeatmap } from "@/components/heatmap/SaleHeatmap";
-import { ItemSelector } from "@/components/controls/ItemSelector";
+import { ItemChips } from "@/components/controls/ItemChips";
 import {
-  DateRangeTabs,
+  DateRangePicker,
   type RangeSelection,
-} from "@/components/controls/DateRangeTabs";
+} from "@/components/controls/DateRangePicker";
 import { UploadZone } from "@/components/UploadZone";
 import { StatCards } from "@/components/StatCards";
 import { ScatterChart } from "@/components/charts/ScatterChart";
@@ -47,9 +47,6 @@ const TAB_LABELS: Record<Tab, string> = {
   sellthrough: "Sell-through",
 };
 const TABS: Tab[] = ["heatmap", "scatter", "pnl", "histogram", "cashflow", "sellthrough"];
-
-// Tabs that aggregate across the whole dataset (item filter doesn't apply).
-const ACROSS_ALL = new Set<Tab>(["cashflow", "sellthrough"]);
 
 export function Dashboard() {
   const [state, setState] = useState<LoadState>({ kind: "boot" });
@@ -181,65 +178,41 @@ function ReadyView({
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded border border-[#333] bg-[#1a1a1a] px-3 py-2 text-xs text-[#999]">
-        <div className="flex flex-wrap items-center gap-3">
-          <span>
-            Realm:{" "}
-            {realms.length > 1 ? (
-              <select
-                value={data.realm}
-                onChange={(e) => onSwitchRealm(e.target.value)}
-                className="rounded border border-[#333] bg-[#252525] px-2 py-1 text-[#e0e0e0]"
-              >
-                {realms.map((r) => (
-                  <option key={r} value={r}>
-                    {r}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <span className="text-[#e0e0e0]">{data.realm}</span>
-            )}
-          </span>
-          <span>
-            Loaded {new Date(data.loadedAt).toLocaleString()} ·{" "}
-            {data.sales.length.toLocaleString()} sales · {data.purchases.length.toLocaleString()} buys
-          </span>
-        </div>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => setShowUpload((s) => !s)}
-            className="rounded border border-[#333] bg-[#252525] px-2 py-1 text-[#e0e0e0] hover:border-[#555]"
-          >
-            {showUpload ? "Close" : "Upload more"}
-          </button>
-          <button
-            type="button"
-            onClick={onClear}
-            className="rounded border border-[#5a2526] bg-[#2a1010] px-2 py-1 text-[#e24b4a] hover:bg-[#3a1818]"
-          >
-            Clear data
-          </button>
-        </div>
-      </div>
+      <StatusBar
+        data={data}
+        realms={realms}
+        onSwitchRealm={onSwitchRealm}
+        onUploadMore={() => setShowUpload(true)}
+        onClear={onClear}
+      />
 
       {showUpload && (
-        <UploadZone onLoaded={(d) => { onLoaded(d); setShowUpload(false); }} />
+        <UploadZone
+          onLoaded={(d) => {
+            onLoaded(d);
+            setShowUpload(false);
+          }}
+        />
       )}
 
-      <div className="flex flex-wrap items-end gap-4">
-        <Field label="Item">
-          <ItemSelector
+      <section className="flex flex-col gap-4 rounded-lg border border-[#333] bg-[#1a1a1a] p-4">
+        <div className="flex flex-col gap-2">
+          <span className="text-[10px] font-medium uppercase tracking-wide text-[#666]">
+            Item
+          </span>
+          <ItemChips
             items={items}
             value={item}
             onChange={(next) =>
               setParams({ item: next === DEFAULT_ITEM ? null : next })
             }
           />
-        </Field>
-        <Field label="Range">
-          <DateRangeTabs
+        </div>
+        <div className="flex flex-col gap-2 border-t border-[#252525] pt-4">
+          <span className="text-[10px] font-medium uppercase tracking-wide text-[#666]">
+            Range
+          </span>
+          <DateRangePicker
             fullStart={fullStart}
             fullEnd={fullEnd}
             value={range}
@@ -261,8 +234,8 @@ function ReadyView({
               }
             }}
           />
-        </Field>
-      </div>
+        </div>
+      </section>
 
       <StatCards stats={stats} />
 
@@ -317,13 +290,111 @@ function ReadyView({
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function StatusBar({
+  data,
+  realms,
+  onSwitchRealm,
+  onUploadMore,
+  onClear,
+}: {
+  data: LoadedData;
+  realms: string[];
+  onSwitchRealm: (r: string) => void;
+  onUploadMore: () => void;
+  onClear: () => void;
+}) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function onClick(e: MouseEvent) {
+      if (!menuRef.current?.contains(e.target as Node)) setMenuOpen(false);
+    }
+    if (menuOpen) {
+      document.addEventListener("mousedown", onClick);
+      return () => document.removeEventListener("mousedown", onClick);
+    }
+  }, [menuOpen]);
+
   return (
-    <div className="flex flex-col gap-1">
-      <span className="text-[10px] uppercase tracking-wide text-[#666]">
-        {label}
-      </span>
-      {children}
+    <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-[#999]">
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="flex items-center gap-1.5">
+          <span className="text-[#666]">Realm</span>
+          {realms.length > 1 ? (
+            <select
+              value={data.realm}
+              onChange={(e) => onSwitchRealm(e.target.value)}
+              className="rounded border border-[#333] bg-[#252525] px-2 py-1 text-[#e0e0e0]"
+            >
+              {realms.map((r) => (
+                <option key={r} value={r}>
+                  {r}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <span className="font-medium text-[#e0e0e0]">{data.realm}</span>
+          )}
+        </span>
+        <span className="hidden text-[#444] sm:inline">·</span>
+        <span>
+          <span className="text-[#e0e0e0] tabular-nums">
+            {data.sales.length.toLocaleString()}
+          </span>{" "}
+          sales
+          <span className="px-1 text-[#444]">·</span>
+          <span className="text-[#e0e0e0] tabular-nums">
+            {data.purchases.length.toLocaleString()}
+          </span>{" "}
+          buys
+        </span>
+        <span className="hidden text-[#444] sm:inline">·</span>
+        <span className="text-[#666]">
+          loaded {new Date(data.loadedAt).toLocaleString()}
+        </span>
+      </div>
+      <div ref={menuRef} className="relative">
+        <button
+          type="button"
+          onClick={() => setMenuOpen((o) => !o)}
+          aria-haspopup="menu"
+          aria-expanded={menuOpen}
+          className="flex items-center gap-1 rounded border border-[#333] bg-[#252525] px-2.5 py-1 text-[#e0e0e0] hover:border-[#555]"
+        >
+          Manage data
+          <span className="text-[#666]">⋯</span>
+        </button>
+        {menuOpen && (
+          <div
+            role="menu"
+            className="absolute right-0 z-20 mt-1 w-48 overflow-hidden rounded-md border border-[#333] bg-[#1a1a1a] shadow-xl"
+          >
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                onUploadMore();
+                setMenuOpen(false);
+              }}
+              className="block w-full px-3 py-2 text-left text-xs text-[#e0e0e0] hover:bg-[#252525]"
+            >
+              Upload more files…
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setMenuOpen(false);
+                onClear();
+              }}
+              className="block w-full border-t border-[#333] px-3 py-2 text-left text-xs text-[#e24b4a] hover:bg-[#2a1010]"
+            >
+              Clear all data…
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -362,5 +433,5 @@ function parseRange(
 }
 
 function toIsoDate(d: Date): string {
-  return d.toISOString().slice(0, 10);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
