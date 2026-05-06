@@ -8,6 +8,7 @@ export type DashboardParams = {
   range: string | null; // 'all' | 'week:YYYY-MM-DD' | 'custom'
   start: string | null; // YYYY-MM-DD when range === 'custom'
   end: string | null;
+  tab: string | null; // 'heatmap' | 'scatter' | 'pnl' | 'histogram'
 };
 
 export function useDashboardParams() {
@@ -20,6 +21,7 @@ export function useDashboardParams() {
       range: searchParams.get("range"),
       start: searchParams.get("start"),
       end: searchParams.get("end"),
+      tab: searchParams.get("tab"),
     }),
     [searchParams],
   );
