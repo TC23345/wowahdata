@@ -165,7 +165,7 @@ function DayRow({
             onMouseLeave={onLeave}
             onFocus={() => onHover(h)}
             onBlur={onLeave}
-            className={`aspect-[3/2] w-full rounded-[3px] outline-none transition-shadow md:aspect-[5/3] ${
+            className={`h-12 w-full rounded-[3px] outline-none transition-shadow md:h-14 lg:h-16 ${
               isHovered(h) ? "ring-1 ring-white/70" : ""
             }`}
             style={{ background: bg }}

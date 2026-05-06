@@ -180,9 +180,18 @@ function ReadyView({
     <div className="flex flex-col gap-5">
       <section className="flex flex-col gap-4 rounded-lg border border-[#333] bg-[#1a1a1a] p-4">
         <div className="flex flex-col gap-2">
-          <span className="text-[10px] font-medium uppercase tracking-wide text-[#666]">
-            Item
-          </span>
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[10px] font-medium uppercase tracking-wide text-[#666]">
+              Item
+            </span>
+            <ManageDataMenu
+              realms={realms}
+              activeRealm={data.realm}
+              onSwitchRealm={onSwitchRealm}
+              onUploadMore={() => setShowUpload(true)}
+              onClear={onClear}
+            />
+          </div>
           <ItemChips
             items={items}
             value={item}
@@ -280,27 +289,74 @@ function ReadyView({
       )}
 
       <footer className="mt-4 border-t border-[#252525] pt-4">
-        <StatusBar
+        <DataMetaFooter
           data={data}
           realms={realms}
           onSwitchRealm={onSwitchRealm}
-          onUploadMore={() => setShowUpload(true)}
-          onClear={onClear}
         />
       </footer>
     </div>
   );
 }
 
-function StatusBar({
+function DataMetaFooter({
   data,
   realms,
+  onSwitchRealm,
+}: {
+  data: LoadedData;
+  realms: string[];
+  onSwitchRealm: (r: string) => void;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-3 text-xs text-[#999]">
+      <span className="flex items-center gap-1.5">
+        <span className="text-[#666]">Realm</span>
+        {realms.length > 1 ? (
+          <select
+            value={data.realm}
+            onChange={(e) => onSwitchRealm(e.target.value)}
+            className="rounded border border-[#333] bg-[#252525] px-2 py-1 text-[#e0e0e0]"
+          >
+            {realms.map((r) => (
+              <option key={r} value={r}>
+                {r}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <span className="font-medium text-[#e0e0e0]">{data.realm}</span>
+        )}
+      </span>
+      <span className="hidden text-[#444] sm:inline">·</span>
+      <span>
+        <span className="text-[#e0e0e0] tabular-nums">
+          {data.sales.length.toLocaleString()}
+        </span>{" "}
+        sales
+        <span className="px-1 text-[#444]">·</span>
+        <span className="text-[#e0e0e0] tabular-nums">
+          {data.purchases.length.toLocaleString()}
+        </span>{" "}
+        buys
+      </span>
+      <span className="hidden text-[#444] sm:inline">·</span>
+      <span className="text-[#666]">
+        loaded {new Date(data.loadedAt).toLocaleString()}
+      </span>
+    </div>
+  );
+}
+
+function ManageDataMenu({
+  realms,
+  activeRealm,
   onSwitchRealm,
   onUploadMore,
   onClear,
 }: {
-  data: LoadedData;
   realms: string[];
+  activeRealm: string;
   onSwitchRealm: (r: string) => void;
   onUploadMore: () => void;
   onClear: () => void;
@@ -319,84 +375,65 @@ function StatusBar({
   }, [menuOpen]);
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-[#999]">
-      <div className="flex flex-wrap items-center gap-3">
-        <span className="flex items-center gap-1.5">
-          <span className="text-[#666]">Realm</span>
-          {realms.length > 1 ? (
-            <select
-              value={data.realm}
-              onChange={(e) => onSwitchRealm(e.target.value)}
-              className="rounded border border-[#333] bg-[#252525] px-2 py-1 text-[#e0e0e0]"
-            >
-              {realms.map((r) => (
-                <option key={r} value={r}>
-                  {r}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <span className="font-medium text-[#e0e0e0]">{data.realm}</span>
-          )}
-        </span>
-        <span className="hidden text-[#444] sm:inline">·</span>
-        <span>
-          <span className="text-[#e0e0e0] tabular-nums">
-            {data.sales.length.toLocaleString()}
-          </span>{" "}
-          sales
-          <span className="px-1 text-[#444]">·</span>
-          <span className="text-[#e0e0e0] tabular-nums">
-            {data.purchases.length.toLocaleString()}
-          </span>{" "}
-          buys
-        </span>
-        <span className="hidden text-[#444] sm:inline">·</span>
-        <span className="text-[#666]">
-          loaded {new Date(data.loadedAt).toLocaleString()}
-        </span>
-      </div>
-      <div ref={menuRef} className="relative">
-        <button
-          type="button"
-          onClick={() => setMenuOpen((o) => !o)}
-          aria-haspopup="menu"
-          aria-expanded={menuOpen}
-          className="flex items-center gap-1 rounded border border-[#333] bg-[#252525] px-2.5 py-1 text-[#e0e0e0] hover:border-[#555]"
+    <div ref={menuRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setMenuOpen((o) => !o)}
+        aria-haspopup="menu"
+        aria-expanded={menuOpen}
+        className="flex items-center gap-1 rounded border border-[#333] bg-[#252525] px-2.5 py-1 text-xs text-[#e0e0e0] hover:border-[#555]"
+      >
+        Manage data
+        <span className="text-[#666]">⋯</span>
+      </button>
+      {menuOpen && (
+        <div
+          role="menu"
+          className="absolute right-0 top-full z-20 mt-1 w-56 overflow-hidden rounded-md border border-[#333] bg-[#1a1a1a] shadow-xl"
         >
-          Manage data
-          <span className="text-[#666]">⋯</span>
-        </button>
-        {menuOpen && (
-          <div
-            role="menu"
-            className="absolute bottom-full right-0 z-20 mb-1 w-48 overflow-hidden rounded-md border border-[#333] bg-[#1a1a1a] shadow-xl"
+          {realms.length > 1 && (
+            <div className="border-b border-[#333] px-3 py-2 text-[10px] text-[#666]">
+              <p className="mb-1 uppercase tracking-wide">Active realm</p>
+              <select
+                value={activeRealm}
+                onChange={(e) => {
+                  onSwitchRealm(e.target.value);
+                  setMenuOpen(false);
+                }}
+                className="w-full rounded border border-[#333] bg-[#252525] px-2 py-1 text-xs text-[#e0e0e0]"
+              >
+                {realms.map((r) => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              onUploadMore();
+              setMenuOpen(false);
+            }}
+            className="block w-full px-3 py-2 text-left text-xs text-[#e0e0e0] hover:bg-[#252525]"
           >
-            <button
-              type="button"
-              role="menuitem"
-              onClick={() => {
-                onUploadMore();
-                setMenuOpen(false);
-              }}
-              className="block w-full px-3 py-2 text-left text-xs text-[#e0e0e0] hover:bg-[#252525]"
-            >
-              Upload more files…
-            </button>
-            <button
-              type="button"
-              role="menuitem"
-              onClick={() => {
-                setMenuOpen(false);
-                onClear();
-              }}
-              className="block w-full border-t border-[#333] px-3 py-2 text-left text-xs text-[#e24b4a] hover:bg-[#2a1010]"
-            >
-              Clear all data…
-            </button>
-          </div>
-        )}
-      </div>
+            Upload more files…
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              setMenuOpen(false);
+              onClear();
+            }}
+            className="block w-full border-t border-[#333] px-3 py-2 text-left text-xs text-[#e24b4a] hover:bg-[#2a1010]"
+          >
+            Clear all data…
+          </button>
+        </div>
+      )}
     </div>
   );
 }
