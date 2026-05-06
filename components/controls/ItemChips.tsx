@@ -2,9 +2,10 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CURATED_ITEMS } from "@/lib/curated";
-import { SYNTHETIC_DE_GEAR } from "@/lib/csv";
 import type { ItemSummary } from "@/lib/items";
 import { searchItems } from "@/lib/items";
+
+const VISIBLE_CHIP_COUNT = 8;
 
 type Props = {
   items: ItemSummary[];
@@ -19,27 +20,33 @@ export function ItemChips({ items, value, onChange }: Props) {
     return m;
   }, [items]);
 
-  // Curated items that actually have activity in the loaded dataset, in
-  // CURATED_ITEMS order. Items not in the dataset don't earn a chip slot.
-  const curatedActive = useMemo(
-    () =>
-      CURATED_ITEMS.map((name) => itemsByName.get(name)).filter(
-        (i): i is ItemSummary => Boolean(i && i.txnCount > 0),
-      ),
-    [itemsByName],
-  );
+  // Top N curated items that have activity in the loaded dataset, sorted by
+  // transaction count descending. Items with zero activity drop off — no
+  // point pinning a chip when there's no data behind it.
+  const visibleChips = useMemo(() => {
+    const curatedActive = CURATED_ITEMS
+      .map((name) => itemsByName.get(name))
+      .filter((i): i is ItemSummary => Boolean(i && i.txnCount > 0))
+      .sort((a, b) => b.txnCount - a.txnCount);
+    return curatedActive.slice(0, VISIBLE_CHIP_COUNT);
+  }, [itemsByName]);
 
   const isCurated = (name: string): boolean =>
     (CURATED_ITEMS as readonly string[]).includes(name);
 
-  // If the active item is non-curated, render a temporary "pinned" chip so
-  // the user can see it among the chips and clear back to the default.
-  const activeNonCurated =
-    !isCurated(value) && itemsByName.get(value) ? itemsByName.get(value)! : null;
+  const isVisible = (name: string): boolean =>
+    visibleChips.some((c) => c.name === name);
+
+  // If the active item is non-curated OR a curated item that didn't make the
+  // top-N visible chips, render it as a temporary "pinned" chip with × so
+  // the user can clear back to the default. This way the active selection
+  // is always visible somewhere in the chip row.
+  const activePinned =
+    !isVisible(value) && itemsByName.get(value) ? itemsByName.get(value)! : null;
 
   return (
     <div className="flex flex-wrap items-center gap-1.5">
-      {curatedActive.map((item) => (
+      {visibleChips.map((item) => (
         <Chip
           key={item.name}
           item={item}
@@ -47,16 +54,17 @@ export function ItemChips({ items, value, onChange }: Props) {
           onClick={() => onChange(item.name)}
         />
       ))}
-      {activeNonCurated && (
+      {activePinned && (
         <Chip
-          item={activeNonCurated}
+          item={activePinned}
           active
-          onClick={() => onChange(activeNonCurated.name)}
+          onClick={() => onChange(activePinned.name)}
           dismissible
           onDismiss={() => onChange("Arcane Dust")}
+          showCuratedBadge={!isCurated(activePinned.name)}
         />
       )}
-      <MorePopover items={items} value={value} onChange={onChange} />
+      <ItemSearchInput items={items} value={value} onChange={onChange} />
     </div>
   );
 }
@@ -67,12 +75,14 @@ function Chip({
   onClick,
   dismissible,
   onDismiss,
+  showCuratedBadge,
 }: {
   item: ItemSummary;
   active: boolean;
   onClick: () => void;
   dismissible?: boolean;
   onDismiss?: () => void;
+  showCuratedBadge?: boolean;
 }) {
   return (
     <span
@@ -100,6 +110,11 @@ function Chip({
             DE
           </span>
         )}
+        {showCuratedBadge && !item.isSynthetic && (
+          <span className="rounded bg-[#333] px-1 py-0.5 text-[9px] uppercase tracking-wide text-[#999]">
+            search
+          </span>
+        )}
       </button>
       {dismissible && (
         <button
@@ -118,7 +133,7 @@ function Chip({
   );
 }
 
-function MorePopover({
+function ItemSearchInput({
   items,
   value,
   onChange,
@@ -127,23 +142,10 @@ function MorePopover({
   value: string;
   onChange: (next: string) => void;
 }) {
-  const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  const totalNonCurated = useMemo(
-    () =>
-      items.filter(
-        (i) => !i.isSynthetic && !(CURATED_ITEMS as readonly string[]).includes(i.name),
-      ).length,
-    [items],
-  );
-
-  const results = useMemo(() => {
-    const curatedSet = new Set<string>(CURATED_ITEMS);
-    return searchItems(items, query).filter((i) => !curatedSet.has(i.name));
-  }, [items, query]);
 
   useEffect(() => {
     function onClick(e: MouseEvent) {
@@ -155,87 +157,100 @@ function MorePopover({
     }
   }, [open]);
 
-  useEffect(() => {
-    if (open) inputRef.current?.focus();
-  }, [open]);
+  const results = useMemo(() => {
+    if (!query.trim()) return [];
+    return searchItems(items, query).slice(0, 50);
+  }, [items, query]);
+
+  const select = (name: string) => {
+    onChange(name);
+    setQuery("");
+    setOpen(false);
+    inputRef.current?.blur();
+  };
 
   return (
     <div ref={containerRef} className="relative inline-block">
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        aria-haspopup="dialog"
-        aria-expanded={open}
-        className="inline-flex items-center gap-1.5 rounded-full border border-[#333] bg-[#1a1a1a] px-3 py-1.5 text-xs text-[#999] hover:border-[#555] hover:text-[#e0e0e0]"
+      <div
+        className={`flex items-center rounded-full border bg-[#1a1a1a] transition-colors ${
+          open ? "border-[#666]" : "border-[#333] hover:border-[#555]"
+        }`}
       >
-        <span>All items</span>
-        <span className="rounded bg-[#252525] px-1 py-0.5 text-[10px] tabular-nums text-[#666]">
-          {totalNonCurated.toLocaleString()}
-        </span>
-        <Caret open={open} />
-      </button>
-      {open && (
-        <div className="absolute right-0 z-20 mt-2 max-h-96 w-80 overflow-hidden rounded-md border border-[#333] bg-[#1a1a1a] shadow-xl">
-          <div className="border-b border-[#333] p-2">
-            <input
-              ref={inputRef}
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search items by name…"
-              className="w-full rounded border border-[#333] bg-[#252525] px-2 py-1.5 text-sm text-[#e0e0e0] outline-none placeholder:text-[#666] focus:border-[#666]"
-            />
-          </div>
-          <ul className="max-h-72 overflow-auto">
-            {results.length === 0 && (
-              <li className="px-3 py-4 text-center text-xs text-[#666]">
-                No items match "{query}".
-              </li>
-            )}
-            {results.slice(0, 200).map((i) => (
-              <li key={i.name}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    onChange(i.name);
-                    setOpen(false);
-                    setQuery("");
-                  }}
-                  className={`flex w-full items-center justify-between gap-2 px-3 py-1.5 text-left text-sm hover:bg-[#252525] ${
-                    i.name === value
-                      ? "bg-[#252525] text-[#e0e0e0]"
-                      : "text-[#999]"
-                  }`}
-                >
-                  <span className="truncate">{i.name}</span>
-                  <span className="shrink-0 text-xs text-[#666]">
-                    {i.txnCount.toLocaleString()}
-                  </span>
-                </button>
-              </li>
-            ))}
-            {results.length > 200 && (
-              <li className="border-t border-[#333] px-3 py-2 text-xs text-[#666]">
-                Showing first 200 of {results.length}. Refine search to see more.
-              </li>
-            )}
-          </ul>
+        <SearchIcon />
+        <input
+          ref={inputRef}
+          type="text"
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setOpen(true);
+          }}
+          onFocus={() => setOpen(true)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && results.length > 0) select(results[0].name);
+            if (e.key === "Escape") {
+              setQuery("");
+              setOpen(false);
+              inputRef.current?.blur();
+            }
+          }}
+          placeholder={`Search ${items.length.toLocaleString()} items…`}
+          className="w-44 bg-transparent py-1.5 pr-3 text-xs text-[#e0e0e0] outline-none placeholder:text-[#666]"
+        />
+      </div>
+      {open && results.length > 0 && (
+        <ul
+          role="listbox"
+          className="absolute right-0 z-20 mt-2 max-h-72 w-72 overflow-auto rounded-md border border-[#333] bg-[#1a1a1a] shadow-xl"
+        >
+          {results.map((i) => (
+            <li key={i.name}>
+              <button
+                type="button"
+                role="option"
+                aria-selected={i.name === value}
+                onClick={() => select(i.name)}
+                className={`flex w-full items-center justify-between gap-2 px-3 py-1.5 text-left text-sm hover:bg-[#252525] ${
+                  i.name === value
+                    ? "bg-[#252525] text-[#e0e0e0]"
+                    : "text-[#999]"
+                }`}
+              >
+                <span className="truncate">{i.name}</span>
+                <span className="shrink-0 text-xs text-[#666]">
+                  {i.txnCount.toLocaleString()}
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {open && query.trim() && results.length === 0 && (
+        <div className="absolute right-0 z-20 mt-2 w-72 rounded-md border border-[#333] bg-[#1a1a1a] px-3 py-3 text-center text-xs text-[#666] shadow-xl">
+          No items match "{query}".
         </div>
       )}
     </div>
   );
 }
 
-function Caret({ open }: { open: boolean }) {
+function SearchIcon() {
   return (
     <svg
-      width="8"
-      height="6"
-      viewBox="0 0 10 6"
+      width="14"
+      height="14"
+      viewBox="0 0 16 16"
       fill="none"
-      className={`text-[#666] transition-transform ${open ? "rotate-180" : ""}`}
+      className="ml-3 mr-1.5 shrink-0 text-[#666]"
+      aria-hidden
     >
-      <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.5" />
+      <path
+        d="M11 11L14 14"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -244,6 +259,3 @@ function formatCount(n: number): string {
   if (n >= 1000) return `${(n / 1000).toFixed(n >= 10_000 ? 0 : 1)}k`;
   return n.toLocaleString();
 }
-
-// Note: synthetic chips show "DE" badge instead of a literal "?".
-void SYNTHETIC_DE_GEAR;
