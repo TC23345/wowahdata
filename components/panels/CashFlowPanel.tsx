@@ -131,7 +131,7 @@ export function CashFlowPanel({ income, expenses }: Props) {
             {weeks.length} week{weeks.length === 1 ? "" : "s"}
           </p>
         </header>
-        <div className="h-[340px]">
+        <div className="h-[clamp(340px,48vh,600px)]">
           <Chart type="bar" data={chartData} options={options} />
         </div>
       </div>

@@ -100,7 +100,7 @@ export function ScatterChart({ buys, sells, itemName }: Props) {
           {data.buys.length} buys · {data.sells.length} sells
         </p>
       </header>
-      <div className="h-[420px]">
+      <div className="h-[clamp(420px,55vh,720px)]">
         <Chart type="bubble" data={chartData} options={options} />
       </div>
     </div>
