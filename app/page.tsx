@@ -1,24 +1,13 @@
 import { Suspense } from "react";
 import { Dashboard } from "@/components/Dashboard";
-import { getSampleData } from "@/lib/sample-data";
-import { aggregateItems } from "@/lib/items";
 
-export const dynamic = "force-static";
+export const metadata = {
+  title: "wowahdata — TSM accounting dashboard",
+  description:
+    "Drop your TradeSkillMaster CSVs and see when your AH actually clears. Per-item sale heatmap, P&L, sell-through. Your data never leaves your browser.",
+};
 
 export default function Home() {
-  const data = getSampleData();
-  const items = aggregateItems(data);
-
-  // Date range is computed from the sales rows alone — heatmap is sales-only.
-  let minTime = Infinity;
-  let maxTime = -Infinity;
-  for (const r of data.sales) {
-    if (r.time < minTime) minTime = r.time;
-    if (r.time > maxTime) maxTime = r.time;
-  }
-  const fullStart = new Date(minTime * 1000);
-  const fullEnd = new Date(maxTime * 1000);
-
   return (
     <main className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 sm:px-8">
       <header className="flex flex-col gap-1">
@@ -26,26 +15,14 @@ export default function Home() {
           wowahdata
         </h1>
         <p className="text-sm text-[#999]">
-          When does your AH actually clear? Sample: {data.realm} ·{" "}
-          {data.sales.length.toLocaleString()} sales rows ·{" "}
-          {fullStart.toLocaleDateString()} – {fullEnd.toLocaleDateString()}
+          When does your AH actually clear? Drop your TSM Accounting CSVs to find out.{" "}
+          <span className="text-[#5dcaa5]">Your data never leaves your browser.</span>
         </p>
       </header>
 
       <Suspense fallback={<p className="text-sm text-[#666]">Loading…</p>}>
-        <Dashboard
-          sales={data.sales}
-          items={items}
-          fullStartIso={fullStart.toISOString()}
-          fullEndIso={fullEnd.toISOString()}
-          realm={data.realm}
-        />
+        <Dashboard />
       </Suspense>
-
-      <p className="text-xs text-[#666]">
-        Upload zone, IndexedDB persistence, and secondary charts arrive in
-        subsequent phases.
-      </p>
     </main>
   );
 }
