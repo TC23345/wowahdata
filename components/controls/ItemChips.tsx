@@ -5,7 +5,7 @@ import { CURATED_ITEMS } from "@/lib/curated";
 import type { ItemSummary } from "@/lib/items";
 import { searchItems } from "@/lib/items";
 
-const VISIBLE_CHIP_COUNT = 8;
+const VISIBLE_CHIP_COUNT = 5;
 
 type Props = {
   items: ItemSummary[];
