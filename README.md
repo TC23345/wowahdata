@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# wowahdata
 
-## Getting Started
+A public, client-side dashboard for WoW auction-house traders. Drop your **TradeSkillMaster Accounting CSVs** in and see when your AH actually clears.
 
-First, run the development server:
+**Your data never leaves your browser.** Parsing happens in-page with PapaParse, parsed rows persist to IndexedDB, and the only network request the app ever makes is loading its own JS and the optional sample dataset. Nothing posts anywhere.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## What you get
+
+- **Per-item sale heatmap** (the hero) — day-of-week × hour-of-day grid showing when units actually move. Tue → Mon row order to match WoW reset.
+- **Buys vs sells scatter** — bubble chart with quantity-scaled radii and seeded jitter, ported from the GPE Python reference.
+- **Daily P&L** — bars (green/red) plus a cumulative line on a secondary axis. No double 5% deduction; TSM sale price is already net of the AH cut.
+- **Price distribution** — buys vs sells overlaid in 0.25 g buckets.
+- **Cash flow** — weekly stacked breakdown of Postage / Repairs / Money Transfers with a net line.
+- **Sell-through** — per-item sold rows / (sold rows + expired rows). Slow movers (< 50% with ≥ 3 events) are flagged red.
+- **Stat cards** — bought, sold (with avg received), expired, canceled, implied DE-sourced, net P&L.
+
+URL search params (`?item=`, `?range=`, `?start=`, `?end=`, `?tab=`) make every view shareable.
+
+## Getting your data
+
+In TSM Accounting → Export → CSV. You'll get six files:
+
+```
+Accounting_<Realm>_purchases.csv
+Accounting_<Realm>_sales.csv
+Accounting_<Realm>_expired.csv
+Accounting_<Realm>_canceled.csv
+Accounting_<Realm>_income.csv
+Accounting_<Realm>_expenses.csv
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Drop any subset into the upload zone. Realm is detected from the filename — multi-realm sessions are supported via a switcher.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Sample data
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Don't have a TSM export handy? Click **Load sample data** to load a scrubbed Nightslayer export covering Jan 21 → May 6, 2026 (~21k rows across all six files). Counterparty names are anonymized; the rest is genuine trading data.
 
-## Learn More
+## Local development
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm install
+npm run dev      # http://localhost:3000
+npm test         # vitest, currently 37 cases
+npm run build    # production build (Turbopack)
+npm run typecheck
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The fixture under `__fixtures__/nightslayer/` is the test data. `scripts/scrub-fixtures.mjs` re-derives it from a real export if you need to refresh — it deterministically maps every counterparty name to `Anon<N>` so the fixtures can be committed.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Stack
 
-## Deploy on Vercel
+- Next.js 16 (App Router, Turbopack)
+- React 19
+- Tailwind CSS v4 (CSS-first via `@theme`)
+- visx for the heatmap, Chart.js for the rest
+- PapaParse + idb-keyval
+- Vitest + Testing Library
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## License
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT.
