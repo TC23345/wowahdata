@@ -1,0 +1,328 @@
+itemString,itemName,stackSize,quantity,player,time
+i:11754,Black Diamond,4,12,Bluemage,1769128707
+i:2633,Jungle Remedy,1,2,Candyowens,1769197284
+i:2633,Jungle Remedy,1,6,Candyowens,1769197285
+i:10217:421,?,1,1,Bluemage,1769254681
+i:9872:1199,?,1,1,Bluemage,1769254709
+i:8308,Hero's Band,1,1,Bluemage,1769254716
+i:6622,Sword of Zeal,1,1,Bluemage,1769281543
+i:12001:1113,?,1,1,Bluemage,1769310740
+i:12001:1198,?,1,2,Bluemage,1769359828
+i:8384,Pattern: Comfortable Leather Hat,1,1,Bluemage,1769440410
+i:12001:1198,?,1,1,Bluemage,1769446210
+i:15763,Pattern: Blue Dragonscale Shoulders,1,1,Bluemage,1769473482
+i:21306,?,1,1,Bluemage,1769496137
+i:11813,Formula: Smoking Heart of the Mountain,1,3,Bluemage,1769498735
+i:12001:1113,?,1,1,Bluemage,1769511794
+i:12001:1113,?,1,1,Bluemage,1769511806
+i:6622,Sword of Zeal,1,1,Bluemage,1769516775
+i:12001:1198,?,1,1,Bluemage,1769625711
+i:10225:1817,?,1,1,Bluemage,1769625744
+i:5432,Hickory Pipe,1,3,Bluemage,1769669383
+i:6622,Sword of Zeal,1,1,Bluemage,1769786221
+i:10247:1970,?,1,1,Bluemage,1769998295
+i:8384,Pattern: Comfortable Leather Hat,1,1,Bluemage,1769998377
+i:12359,Thorium Bar,1,18,Bluemage,1770372873
+i:8384,Pattern: Comfortable Leather Hat,1,1,Bluemage,1770376485
+i:29732,Pattern: Netherdrake Helm,1,1,Bluemage,1770787206
+i:12682,Plans: Thorium Armor,1,1,Bluemage,1770873660
+i:11082,Greater Astral Essence,1,3,Bluemage,1771130700
+i:11082,Greater Astral Essence,1,7,Bluemage,1771130700
+i:11083,Soul Dust,1,13,Bluemage,1771157518
+i:12682,Plans: Thorium Armor,1,4,Bluemage,1771159055
+i:11082,Greater Astral Essence,1,7,Bluemage,1771184291
+i:1179,Ice Cold Milk,1,12,Clickyportal,1771195521
+i:805,Small Red Pouch,1,2,Clickyportal,1771195524
+i:2894,Rhapsody Malt,1,2,Clickyportal,1771195524
+i:4541,Freshly Baked Bread,1,10,Clickyportal,1771195532
+i:11084,Large Glimmering Shard,5,25,Bluemage,1771196543
+i:11084,Large Glimmering Shard,4,4,Bluemage,1771196559
+i:10978,Small Glimmering Shard,1,44,Bluemage,1771196579
+i:11134,Lesser Mystic Essence,3,3,Candyowens,1771224961
+i:12359,Thorium Bar,1,34,Bluemage,1771282848
+i:6663,Recipe: Elixir of Giant Growth,1,3,Bluemage,1771320585
+i:12682,Plans: Thorium Armor,1,2,Bluemage,1771320591
+i:14155,Mooncloth Bag,1,22,Bluemage,1771339411
+i:14155,Mooncloth Bag,1,2,Bluemage,1771339787
+i:11083,Soul Dust,1,1,Bluemage,1771411505
+i:14155,Mooncloth Bag,1,4,Bluemage,1771411657
+i:14155,Mooncloth Bag,1,1,Bluemage,1771411693
+i:6663,Recipe: Elixir of Giant Growth,1,1,Bluemage,1771497952
+i:22446,Greater Planar Essence,1,5,Bluemage,1772116294
+i:14155,Mooncloth Bag,1,12,Bluemage,1772147067
+i:25211:-18,?,1,3,Bluemage,1772377923
+i:22445,Arcane Dust,1,13,Bluemage,1772524305
+i:22445,Arcane Dust,1,82,Bluemage,1772603135
+i:22445,Arcane Dust,1,304,Bluemage,1772610677
+i:22445,Arcane Dust,1,208,Bluemage,1772611033
+i:22445,Arcane Dust,1,489,Bluemage,1772611364
+i:22445,Arcane Dust,1,164,Bluemage,1772612430
+i:22445,Arcane Dust,1,97,Bluemage,1772661327
+i:14344,Large Brilliant Shard,1,12,Bluemage,1772765059
+i:28470,Thick Amber,1,3,Bluemage,1772769119
+i:22445,Arcane Dust,1,295,Bluemage,1772780797
+i:22445,Arcane Dust,1,48,Bluemage,1772858906
+i:22445,Arcane Dust,1,95,Bluemage,1772859596
+i:4499,Huge Brown Sack,1,18,Bluemage,1772882267
+i:4499,Huge Brown Sack,1,1,Bluemage,1772882626
+i:22445,Arcane Dust,1,127,Bluemage,1772943109
+i:22445,Arcane Dust,1,144,Bluemage,1772944987
+i:22445,Arcane Dust,1,67,Bluemage,1772945294
+i:22445,Arcane Dust,1,149,Bluemage,1772945645
+i:22445,Arcane Dust,1,46,Bluemage,1772945950
+i:22445,Arcane Dust,1,42,Bluemage,1772946395
+i:22449,Large Prismatic Shard,1,7,Bluemage,1772949234
+i:22446,Greater Planar Essence,1,38,Bluemage,1772951574
+i:22445,Arcane Dust,1,144,Bluemage,1773017203
+i:22446,Greater Planar Essence,1,1,Bluemage,1773019795
+i:5833,Indurium Ore,1,18,Bluemage,1773019820
+i:22449,Large Prismatic Shard,1,5,Bluemage,1773039178
+i:22449,Large Prismatic Shard,1,11,Bluemage,1773039199
+i:22445,Arcane Dust,1,70,Bluemage,1773043440
+i:22824,Elixir of Major Strength,1,35,Bluemage,1773096304
+i:22446,Greater Planar Essence,1,2,Bluemage,1773116915
+i:22445,Arcane Dust,1,43,Bluemage,1773118259
+i:22445,Arcane Dust,1,35,Bluemage,1773118266
+i:22446,Greater Planar Essence,1,3,Bluemage,1773134800
+i:22445,Arcane Dust,1,33,Bluemage,1773135109
+i:22445,Arcane Dust,1,167,Bluemage,1773191207
+i:22445,Arcane Dust,1,33,Bluemage,1773203565
+i:27515,Huge Spotted Feltail,5,5,Clickyportal,1773265631
+i:22448,Small Prismatic Shard,1,3,Bluemage,1773306122
+i:22448,Small Prismatic Shard,1,19,Bluemage,1773307480
+i:22445,Arcane Dust,1,148,Bluemage,1773353374
+i:14343,Small Brilliant Shard,1,6,Bluemage,1773353570
+i:22445,Arcane Dust,1,14,Bluemage,1773368075
+i:22445,Arcane Dust,1,140,Bluemage,1773368468
+i:22445,Arcane Dust,1,40,Bluemage,1773368793
+i:22445,Arcane Dust,1,2,Bluemage,1773368927
+i:22445,Arcane Dust,1,13,Bluemage,1773369597
+i:22445,Arcane Dust,1,85,Bluemage,1773369603
+i:22445,Arcane Dust,1,81,Bluemage,1773390060
+i:6522,Deviate Fish,1,43,Bluemage,1773390152
+i:22445,Arcane Dust,1,46,Bluemage,1773391020
+i:32948,Auchenai Mana Potion,1,45,Bluemage,1773393336
+i:22445,Arcane Dust,1,145,Bluemage,1773397375
+i:16204,Illusion Dust,1,1,Bluemage,1773469541
+i:6522,Deviate Fish,1,10,Bluemage,1773599723
+i:22575,Mote of Life,1,6,Bluemage,1773600340
+i:27515,Huge Spotted Feltail,1,9,Bluemage,1773635686
+i:22446,Greater Planar Essence,1,5,Bluemage,1773706002
+i:22445,Arcane Dust,1,2,Bluemage,1773706852
+i:6522,Deviate Fish,1,242,Candyowens,1773722465
+i:6522,Deviate Fish,20,440,Candyowens,1773722615
+i:22445,Arcane Dust,1,141,Bluemage,1773725475
+i:22445,Arcane Dust,1,97,Bluemage,1773725777
+i:22445,Arcane Dust,1,107,Bluemage,1773727622
+i:6522,Deviate Fish,1,27,Candyowens,1773728398
+i:22445,Arcane Dust,1,130,Bluemage,1773728828
+i:22445,Arcane Dust,1,152,Bluemage,1773730814
+i:22445,Arcane Dust,1,208,Bluemage,1773732486
+i:22445,Arcane Dust,1,97,Bluemage,1773778402
+i:6522,Deviate Fish,1,6,Bluemage,1773778570
+i:22445,Arcane Dust,1,148,Bluemage,1773792998
+i:22445,Arcane Dust,1,140,Bluemage,1773793358
+i:22445,Arcane Dust,1,93,Bluemage,1773821667
+i:22445,Arcane Dust,1,78,Bluemage,1773822220
+i:21842,Bolt of Imbued Netherweave,1,5,Bluemage,1773902454
+i:21842,Bolt of Imbued Netherweave,1,2,Bluemage,1773902461
+i:22445,Arcane Dust,1,320,Bluemage,1773913279
+i:22445,Arcane Dust,1,962,Bluemage,1773913580
+i:22445,Arcane Dust,1,23,Bluemage,1773941189
+i:22445,Arcane Dust,1,185,Bluemage,1773941830
+i:22445,Arcane Dust,2,22,Bluemage,1773941971
+i:22445,Arcane Dust,3,30,Bluemage,1773941986
+i:22445,Arcane Dust,1,164,Bluemage,1773942130
+i:22445,Arcane Dust,1,70,Bluemage,1773946632
+i:22445,Arcane Dust,1,143,Bluemage,1773995965
+i:22445,Arcane Dust,1,10,Bluemage,1773996619
+i:22445,Arcane Dust,1,86,Bluemage,1773997121
+i:6522,Deviate Fish,1,78,Candyowens,1774001382
+i:6522,Deviate Fish,5,60,Candyowens,1774001454
+i:6522,Deviate Fish,1,29,Candyowens,1774030731
+i:22445,Arcane Dust,1,52,Bluemage,1774032222
+i:22445,Arcane Dust,1,274,Bluemage,1774033014
+i:22445,Arcane Dust,1,24,Bluemage,1774033319
+i:22446,Greater Planar Essence,1,14,Bluemage,1774068121
+i:22446,Greater Planar Essence,1,3,Bluemage,1774071786
+i:22446,Greater Planar Essence,1,20,Bluemage,1774073685
+i:21840,Bolt of Netherweave,1,10,Bluemage,1774074603
+i:32905,Bottled Nethergon Vapor,1,6,Bluemage,1774088235
+i:22445,Arcane Dust,1,3,Bluemage,1774089665
+i:22445,Arcane Dust,1,1,Bluemage,1774089668
+i:22445,Arcane Dust,1,36,Bluemage,1774089675
+i:11134,Lesser Mystic Essence,3,3,Candyowens,1774143884
+i:6522,Deviate Fish,1,100,Candyowens,1774236300
+i:6522,Deviate Fish,3,75,Candyowens,1774236368
+i:22445,Arcane Dust,2,2,Bluemage,1774251869
+i:22445,Arcane Dust,6,6,Bluemage,1774252759
+i:22445,Arcane Dust,3,3,Bluemage,1774252810
+i:22449,Large Prismatic Shard,1,37,Bluemage,1774262118
+i:22445,Arcane Dust,1,139,Bluemage,1774266357
+i:22445,Arcane Dust,1,52,Bluemage,1774350355
+i:22445,Arcane Dust,1,98,Bluemage,1774350795
+i:22445,Arcane Dust,1,69,Bluemage,1774351645
+i:22846,Major Shadow Protection Potion,1,1,Bluemage,1774424081
+i:22445,Arcane Dust,1,29,Bluemage,1774503408
+i:27515,Huge Spotted Feltail,1,6,Bluemage,1774508919
+i:27515,Huge Spotted Feltail,1,1,Bluemage,1774508990
+i:22445,Arcane Dust,1,13,Bluemage,1774520010
+i:27515,Huge Spotted Feltail,1,10,Bluemage,1774520320
+i:6522,Deviate Fish,1,14,Candyowens,1774525930
+i:6522,Deviate Fish,20,40,Candyowens,1774525943
+i:6522,Deviate Fish,1,10,Candyowens,1774525954
+i:22446,Greater Planar Essence,1,24,Bluemage,1774610027
+i:22846,Major Shadow Protection Potion,1,1,Bluemage,1774610164
+i:22445,Arcane Dust,1,94,Bluemage,1774610916
+i:22445,Arcane Dust,1,1,Bluemage,1774610921
+i:22446,Greater Planar Essence,1,4,Bluemage,1774616773
+i:22445,Arcane Dust,1,84,Bluemage,1774616848
+i:22445,Arcane Dust,1,115,Bluemage,1774623953
+i:22445,Arcane Dust,1,25,Bluemage,1774635230
+i:22445,Arcane Dust,1,8,Bluemage,1774635271
+i:22445,Arcane Dust,1,19,Bluemage,1774639986
+i:22445,Arcane Dust,1,13,Bluemage,1774640027
+i:22445,Arcane Dust,1,4,Bluemage,1774640500
+i:22445,Arcane Dust,1,4,Bluemage,1774640528
+i:22445,Arcane Dust,1,31,Bluemage,1774641091
+i:22445,Arcane Dust,1,31,Bluemage,1774641104
+i:22445,Arcane Dust,1,1,Bluemage,1774641982
+i:22445,Arcane Dust,1,16,Bluemage,1774641985
+i:22445,Arcane Dust,1,64,Bluemage,1774657148
+i:22445,Arcane Dust,1,38,Bluemage,1774658051
+i:22445,Arcane Dust,1,34,Bluemage,1774659008
+i:22446,Greater Planar Essence,1,13,Bluemage,1774661610
+i:22851,Flask of Fortification,1,1,Bluemage,1774663713
+i:22851,Flask of Fortification,1,2,Bluemage,1774664523
+i:22445,Arcane Dust,1,1,Bluemage,1774848743
+i:22449,Large Prismatic Shard,1,2,Bluemage,1774863571
+i:6048,Shadow Protection Potion,1,8,Bluemage,1774945115
+i:13465,Mountain Silversage,1,48,Bluemage,1774945825
+i:6657,Savory Deviate Delight,20,100,Candyowens,1774984912
+i:6657,Savory Deviate Delight,20,80,Candyowens,1774984959
+i:13465,Mountain Silversage,20,20,Bluemage,1775075727
+i:13465,Mountain Silversage,1,4,Bluemage,1775076404
+i:13465,Mountain Silversage,1,3,Bluemage,1775077026
+i:21840,Bolt of Netherweave,10,120,Bluemage,1775153253
+i:21840,Bolt of Netherweave,10,140,Bluemage,1775153258
+i:22446,Greater Planar Essence,1,35,Bluemage,1775188334
+i:22446,Greater Planar Essence,1,37,Bluemage,1775189187
+i:22445,Arcane Dust,1,96,Bluemage,1775189316
+i:22445,Arcane Dust,1,8,Bluemage,1775211917
+i:22445,Arcane Dust,1,16,Bluemage,1775211919
+i:22445,Arcane Dust,1,17,Bluemage,1775236356
+i:22445,Arcane Dust,1,5,Bluemage,1775236359
+i:22445,Arcane Dust,1,30,Bluemage,1775236360
+i:22445,Arcane Dust,1,4,Bluemage,1775236377
+i:22446,Greater Planar Essence,1,14,Bluemage,1775246559
+i:22446,Greater Planar Essence,1,7,Bluemage,1775246567
+i:22446,Greater Planar Essence,1,256,Bluemage,1775246822
+i:22446,Greater Planar Essence,1,13,Bluemage,1775246874
+i:22446,Greater Planar Essence,1,32,Bluemage,1775247125
+i:25043:-31,?,1,1,Bluemage,1775308390
+i:21841,Netherweave Bag,1,32,Bluemage,1775336455
+i:21841,Netherweave Bag,1,3,Bluemage,1775337043
+i:22445,Arcane Dust,1,107,Bluemage,1775518666
+i:22445,Arcane Dust,1,109,Bluemage,1775522228
+i:6657,Savory Deviate Delight,1,17,Candyowens,1775551877
+i:23426,Khorium Ore,1,14,Bluemage,1775553520
+i:22851,Flask of Fortification,1,2,Bluemage,1775563083
+i:32902,Bottled Nethergon Energy,1,73,Samaltmann,1775608347
+i:32902,Bottled Nethergon Energy,15,120,Samaltmann,1775608392
+i:22445,Arcane Dust,1,8,Bluemage,1775612849
+i:22445,Arcane Dust,1,5,Bluemage,1775612859
+i:22445,Arcane Dust,1,8,Bluemage,1775615384
+i:22445,Arcane Dust,1,106,Bluemage,1775615389
+i:22445,Arcane Dust,1,67,Bluemage,1775620547
+i:22445,Arcane Dust,1,92,Bluemage,1775622068
+i:22445,Arcane Dust,1,45,Bluemage,1775639418
+i:6657,Savory Deviate Delight,1,113,Candyowens,1775718222
+i:23426,Khorium Ore,1,1,Bluemage,1775776642
+i:22851,Flask of Fortification,1,2,Bluemage,1775782085
+i:22573,Mote of Earth,1,12,Bluemage,1775782125
+i:22573,Mote of Earth,1,6,Bluemage,1775782128
+i:22445,Arcane Dust,1,20,Bluemage,1775785339
+i:22445,Arcane Dust,1,27,Bluemage,1775785342
+i:22445,Arcane Dust,1,77,Bluemage,1775788975
+i:22445,Arcane Dust,1,46,Bluemage,1775789000
+i:4245,Small Silk Pack,1,4,Samaltmann,1775810555
+i:22445,Arcane Dust,1,20,Bluemage,1775850049
+i:22445,Arcane Dust,1,346,Bluemage,1775872654
+i:22445,Arcane Dust,1,73,Bluemage,1775873216
+i:22445,Arcane Dust,1,405,Bluemage,1775873923
+i:22445,Arcane Dust,1,15,Bluemage,1775878795
+i:24691:-16,?,1,3,Bluemage,1775894301
+i:25043:-16,Amber Cape of Stamina,1,6,Bluemage,1775894382
+i:21840,Bolt of Netherweave,1,17,Bluemage,1775976649
+i:21840,Bolt of Netherweave,10,70,Bluemage,1775976751
+i:21840,Bolt of Netherweave,1,15,Bluemage,1775978197
+i:21840,Bolt of Netherweave,1,30,Bluemage,1775979920
+i:21840,Bolt of Netherweave,1,147,Bluemage,1775981353
+i:21840,Bolt of Netherweave,1,155,Bluemage,1775981446
+i:21840,Bolt of Netherweave,10,100,Bluemage,1775982596
+i:21840,Bolt of Netherweave,10,260,Bluemage,1775982597
+i:21840,Bolt of Netherweave,10,70,Bluemage,1775984470
+i:21840,Bolt of Netherweave,10,210,Bluemage,1775984475
+i:21840,Bolt of Netherweave,1,21,Bluemage,1775984496
+i:21840,Bolt of Netherweave,1,33,Bluemage,1775984502
+i:32902,Bottled Nethergon Energy,1,247,Samaltmann,1776024638
+i:22460,Prismatic Sphere,1,10,Bluemage,1776237028
+i:23107,Shadow Draenite,1,1,Bluemage,1776245312
+i:22573,Mote of Earth,1,7,Bluemage,1776324014
+i:22460,Prismatic Sphere,1,10,Bluemage,1776421465
+i:22445,Arcane Dust,1,85,Bluemage,1776484496
+i:22445,Arcane Dust,1,152,Bluemage,1776485039
+i:22445,Arcane Dust,1,37,Bluemage,1776485353
+i:22445,Arcane Dust,1,29,Bluemage,1776486229
+i:22445,Arcane Dust,1,293,Bluemage,1776486443
+i:22445,Arcane Dust,1,234,Bluemage,1776486830
+i:22446,Greater Planar Essence,1,59,Bluemage,1776487285
+i:22445,Arcane Dust,1,103,Bluemage,1776487472
+i:22445,Arcane Dust,1,46,Bluemage,1776487534
+i:22445,Arcane Dust,1,66,Bluemage,1776487588
+i:22446,Greater Planar Essence,1,9,Bluemage,1776490020
+i:22446,Greater Planar Essence,1,6,Bluemage,1776490021
+i:21842,Bolt of Imbued Netherweave,1,11,Bluemage,1776490826
+i:21842,Bolt of Imbued Netherweave,1,9,Bluemage,1776490833
+i:21840,Bolt of Netherweave,1,6,Bluemage,1776498185
+i:21840,Bolt of Netherweave,10,40,Bluemage,1776499569
+i:24910:-5,Netherstorm Belt of the Monkey,1,1,Bluemage,1776504928
+i:24654:-16,?,1,1,Bluemage,1776505318
+i:24912:-43,?,1,1,Bluemage,1776505327
+i:24773:-34,?,1,3,Bluemage,1776505334
+i:32902,Bottled Nethergon Energy,1,100,Samaltmann,1776550121
+i:27515,Huge Spotted Feltail,1,38,Candyowens,1776550535
+i:27515,Huge Spotted Feltail,1,5,Candyowens,1776550550
+i:24891:-43,?,1,1,Bluemage,1776576037
+i:24993:-9,?,1,1,Bluemage,1776576041
+i:22445,Arcane Dust,1,15,Bluemage,1776590810
+i:25029:-15,?,1,3,Bluemage,1776591013
+i:24665:-25,?,1,1,Bluemage,1776591037
+i:25025:-16,?,1,1,Bluemage,1776591156
+i:22445,Arcane Dust,1,54,Bluemage,1776591176
+i:22445,Arcane Dust,1,6,Bluemage,1776595324
+i:22445,Arcane Dust,1,17,Bluemage,1776663504
+i:22445,Arcane Dust,1,140,Bluemage,1776670924
+i:22445,Arcane Dust,1,38,Bluemage,1776671093
+i:22445,Arcane Dust,1,144,Bluemage,1776671871
+i:22445,Arcane Dust,1,60,Bluemage,1776672825
+i:22445,Arcane Dust,1,33,Bluemage,1776674956
+i:22445,Arcane Dust,1,71,Bluemage,1776674956
+i:22460,Prismatic Sphere,1,9,Bluemage,1776799061
+i:22446,Greater Planar Essence,1,16,Bluemage,1776870759
+i:22450,Void Crystal,1,84,Bluemage,1776870796
+i:22445,Arcane Dust,1,82,Bluemage,1777365177
+i:22445,Arcane Dust,1,26,Bluemage,1777365181
+i:22445,Arcane Dust,1,31,Bluemage,1777365481
+i:22445,Arcane Dust,1,65,Bluemage,1777365483
+i:23737,Adamantite Grenade,1,26,Bluemage,1777448897
+i:22794,Fel Lotus,1,1,Bluemage,1777537552
+i:23737,Adamantite Grenade,1,23,Bluemage,1777688579
+i:23781,Elemental Blasting Powder,1,88,Bluemage,1777688604
+i:10940,Strange Dust,1,15,Bluemage,1777740213
+i:3470,Rough Grinding Stone,19,19,Bluemage,1777786709
+i:2871,Heavy Sharpening Stone,1,14,Bluemage,1778040826
+i:28420,Fel Weightstone,1,15,Bluemage,1778040834
+i:25521,Greater Rune of Warding,1,1,Bluemage,1778055606
+i:23575,Lesser Ward of Shielding,1,18,Bluemage,1778056463
+i:23559,Lesser Rune of Warding,1,13,Bluemage,1778056468

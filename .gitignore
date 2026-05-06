@@ -49,3 +49,5 @@ AGENTS.md
 data/
 *.csv
 !__fixtures__/**/*.csv
+
+.vercel
