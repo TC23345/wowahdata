@@ -96,7 +96,7 @@ export function Dashboard() {
   }, [setParams]);
 
   if (state.kind === "boot") {
-    return <p className="text-sm text-[#666]">Loading…</p>;
+    return <p className="text-sm text-text-muted">Loading…</p>;
   }
 
   if (state.kind === "empty") {
@@ -178,10 +178,10 @@ function ReadyView({
 
   return (
     <div className="flex flex-col gap-5">
-      <section className="flex flex-col gap-4 rounded-lg border border-[#333] bg-[#1a1a1a] p-4">
+      <section className="flex flex-col gap-4 rounded-lg border border-border bg-background p-4">
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-[10px] font-medium uppercase tracking-wide text-[#666]">
+            <span className="text-[10px] font-medium uppercase tracking-wide text-text-muted">
               Item
             </span>
             <ManageDataMenu
@@ -200,8 +200,8 @@ function ReadyView({
             }
           />
         </div>
-        <div className="flex flex-col gap-2 border-t border-[#252525] pt-4">
-          <span className="text-[10px] font-medium uppercase tracking-wide text-[#666]">
+        <div className="flex flex-col gap-2 border-t border-divider pt-4">
+          <span className="text-[10px] font-medium uppercase tracking-wide text-text-muted">
             Range
           </span>
           <DateRangePicker
@@ -233,7 +233,7 @@ function ReadyView({
 
       <div
         role="tablist"
-        className="flex gap-1 border-b border-[#333] text-xs"
+        className="flex gap-1 border-b border-border text-xs"
       >
         {TABS.map((t) => (
           <button
@@ -243,8 +243,8 @@ function ReadyView({
             onClick={() => setParams({ tab: t === "heatmap" ? null : t })}
             className={`rounded-t px-3 py-1.5 transition-colors ${
               t === tab
-                ? "border-b-2 border-[#5dcaa5] bg-[#252525] text-[#e0e0e0]"
-                : "text-[#999] hover:text-[#e0e0e0]"
+                ? "border-b-2 border-accent bg-surface text-text-primary"
+                : "text-text-secondary hover:text-text-primary"
             }`}
           >
             {TAB_LABELS[t]}
@@ -288,7 +288,7 @@ function ReadyView({
         />
       )}
 
-      <footer className="mt-4 border-t border-[#252525] pt-4">
+      <footer className="mt-4 border-t border-divider pt-4">
         <DataMetaFooter
           data={data}
           realms={realms}
@@ -309,14 +309,14 @@ function DataMetaFooter({
   onSwitchRealm: (r: string) => void;
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-3 text-xs text-[#999]">
+    <div className="flex flex-wrap items-center gap-3 text-xs text-text-secondary">
       <span className="flex items-center gap-1.5">
-        <span className="text-[#666]">Realm</span>
+        <span className="text-text-muted">Realm</span>
         {realms.length > 1 ? (
           <select
             value={data.realm}
             onChange={(e) => onSwitchRealm(e.target.value)}
-            className="rounded border border-[#333] bg-[#252525] px-2 py-1 text-[#e0e0e0]"
+            className="rounded border border-border bg-surface px-2 py-1 text-text-primary"
           >
             {realms.map((r) => (
               <option key={r} value={r}>
@@ -325,23 +325,23 @@ function DataMetaFooter({
             ))}
           </select>
         ) : (
-          <span className="font-medium text-[#e0e0e0]">{data.realm}</span>
+          <span className="font-medium text-text-primary">{data.realm}</span>
         )}
       </span>
-      <span className="hidden text-[#444] sm:inline">·</span>
+      <span className="hidden text-border-strong sm:inline">·</span>
       <span>
-        <span className="text-[#e0e0e0] tabular-nums">
+        <span className="text-text-primary tabular-nums">
           {data.sales.length.toLocaleString()}
         </span>{" "}
         sales
-        <span className="px-1 text-[#444]">·</span>
-        <span className="text-[#e0e0e0] tabular-nums">
+        <span className="px-1 text-border-strong">·</span>
+        <span className="text-text-primary tabular-nums">
           {data.purchases.length.toLocaleString()}
         </span>{" "}
         buys
       </span>
-      <span className="hidden text-[#444] sm:inline">·</span>
-      <span className="text-[#666]">
+      <span className="hidden text-border-strong sm:inline">·</span>
+      <span className="text-text-muted">
         loaded {new Date(data.loadedAt).toLocaleString()}
       </span>
     </div>
@@ -381,18 +381,18 @@ function ManageDataMenu({
         onClick={() => setMenuOpen((o) => !o)}
         aria-haspopup="menu"
         aria-expanded={menuOpen}
-        className="flex items-center gap-1 rounded border border-[#333] bg-[#252525] px-2.5 py-1 text-xs text-[#e0e0e0] hover:border-[#555]"
+        className="flex items-center gap-1 rounded border border-border bg-surface px-2.5 py-1 text-xs text-text-primary hover:border-border-strong"
       >
         Manage data
-        <span className="text-[#666]">⋯</span>
+        <span className="text-text-muted">⋯</span>
       </button>
       {menuOpen && (
         <div
           role="menu"
-          className="absolute right-0 top-full z-20 mt-1 w-56 overflow-hidden rounded-md border border-[#333] bg-[#1a1a1a] shadow-xl"
+          className="absolute right-0 top-full z-20 mt-1 w-56 overflow-hidden rounded-md border border-border bg-background shadow-xl"
         >
           {realms.length > 1 && (
-            <div className="border-b border-[#333] px-3 py-2 text-[10px] text-[#666]">
+            <div className="border-b border-border px-3 py-2 text-[10px] text-text-muted">
               <p className="mb-1 uppercase tracking-wide">Active realm</p>
               <select
                 value={activeRealm}
@@ -400,7 +400,7 @@ function ManageDataMenu({
                   onSwitchRealm(e.target.value);
                   setMenuOpen(false);
                 }}
-                className="w-full rounded border border-[#333] bg-[#252525] px-2 py-1 text-xs text-[#e0e0e0]"
+                className="w-full rounded border border-border bg-surface px-2 py-1 text-xs text-text-primary"
               >
                 {realms.map((r) => (
                   <option key={r} value={r}>
@@ -417,7 +417,7 @@ function ManageDataMenu({
               onUploadMore();
               setMenuOpen(false);
             }}
-            className="block w-full px-3 py-2 text-left text-xs text-[#e0e0e0] hover:bg-[#252525]"
+            className="block w-full px-3 py-2 text-left text-xs text-text-primary hover:bg-surface"
           >
             Upload more files…
           </button>
@@ -428,7 +428,7 @@ function ManageDataMenu({
               setMenuOpen(false);
               onClear();
             }}
-            className="block w-full border-t border-[#333] px-3 py-2 text-left text-xs text-[#e24b4a] hover:bg-[#2a1010]"
+            className="block w-full border-t border-border px-3 py-2 text-left text-xs text-loss hover:bg-danger-soft"
           >
             Clear all data…
           </button>

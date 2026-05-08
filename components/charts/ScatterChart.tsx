@@ -5,7 +5,12 @@ import { Chart } from "react-chartjs-2";
 import type { TooltipItem } from "chart.js";
 import type { PurchaseSaleRow } from "@/lib/csv";
 import { buildScatterData, type ScatterPoint } from "@/lib/charts";
-import { COLORS, ensureChartsRegistered } from "./chartjsSetup";
+import {
+  applyChartDefaults,
+  ensureChartsRegistered,
+  getChartColors,
+} from "./chartjsSetup";
+import { useTheme } from "@/lib/useTheme";
 
 ensureChartsRegistered();
 
@@ -16,15 +21,21 @@ type Props = {
 };
 
 export function ScatterChart({ buys, sells, itemName }: Props) {
+  const theme = useTheme();
   const data = useMemo(() => buildScatterData(buys, sells), [buys, sells]);
 
   if (data.dayLabels.length === 0) {
     return (
-      <p className="rounded-lg border border-[#333] bg-[#252525] p-6 text-sm text-[#999]">
+      <p className="rounded-lg border border-border bg-surface p-6 text-sm text-text-secondary">
         No buy or sell activity for {itemName} in this range.
       </p>
     );
   }
+
+  // Refresh defaults + read fresh CSS-var-backed colors on every render so a
+  // theme swap repaints immediately.
+  applyChartDefaults();
+  const c = getChartColors();
 
   const chartData = {
     datasets: [
@@ -32,16 +43,16 @@ export function ScatterChart({ buys, sells, itemName }: Props) {
         type: "bubble" as const,
         label: "Buys",
         data: data.buys.map((p) => ({ x: p.x, y: p.y, r: p.r, raw: p })),
-        backgroundColor: COLORS.buyFill,
-        borderColor: COLORS.buyStroke,
+        backgroundColor: c.buyFill,
+        borderColor: c.buyStroke,
         borderWidth: 1,
       },
       {
         type: "bubble" as const,
         label: "Sells",
         data: data.sells.map((p) => ({ x: p.x, y: p.y, r: p.r, raw: p })),
-        backgroundColor: COLORS.sellFill,
-        borderColor: COLORS.sellStroke,
+        backgroundColor: c.sellFill,
+        borderColor: c.sellStroke,
         borderWidth: 1,
       },
     ],
@@ -61,18 +72,18 @@ export function ScatterChart({ buys, sells, itemName }: Props) {
             const idx = typeof value === "number" ? value : parseInt(value, 10);
             return data.dayLabels[idx] ?? "";
           },
-          color: COLORS.text,
+          color: c.text,
         },
-        grid: { color: "#2a2a2a" },
+        grid: { color: c.grid },
       },
       y: {
-        title: { display: true, text: "Gold per unit", color: COLORS.text },
-        ticks: { color: COLORS.text },
-        grid: { color: "#2a2a2a" },
+        title: { display: true, text: "Gold per unit", color: c.text },
+        ticks: { color: c.text },
+        grid: { color: c.grid },
       },
     },
     plugins: {
-      legend: { labels: { color: "#e0e0e0" } },
+      legend: { labels: { color: c.text } },
       tooltip: {
         callbacks: {
           label: (ctx: TooltipItem<"bubble">) => {
@@ -91,17 +102,17 @@ export function ScatterChart({ buys, sells, itemName }: Props) {
   };
 
   return (
-    <div className="rounded-lg border border-[#333] bg-[#252525] p-4">
+    <div className="rounded-lg border border-border bg-surface p-4">
       <header className="mb-2 flex items-baseline justify-between">
-        <h3 className="text-sm font-medium text-[#e0e0e0]">
+        <h3 className="text-sm font-medium text-text-primary">
           Buys vs Sells over time
         </h3>
-        <p className="text-xs text-[#666]">
+        <p className="text-xs text-text-muted">
           {data.buys.length} buys · {data.sells.length} sells
         </p>
       </header>
       <div className="h-[clamp(420px,55vh,720px)]">
-        <Chart type="bubble" data={chartData} options={options} />
+        <Chart key={theme} type="bubble" data={chartData} options={options} />
       </div>
     </div>
   );

@@ -94,7 +94,7 @@ export function DateRangePicker({ fullStart, fullEnd, value, onChange }: Props) 
       </div>
 
       {showCustom && (
-        <div className="flex flex-wrap items-end gap-2 rounded border border-[#333] bg-[#1a1a1a] p-3 text-xs text-[#999]">
+        <div className="flex flex-wrap items-end gap-2 rounded border border-border bg-background p-3 text-xs text-text-secondary">
           <Field label="Start">
             <input
               type="date"
@@ -102,7 +102,7 @@ export function DateRangePicker({ fullStart, fullEnd, value, onChange }: Props) 
               min={toIsoDate(fullStart)}
               max={toIsoDate(fullEnd)}
               onChange={(e) => setCustomStart(e.target.value)}
-              className="rounded border border-[#333] bg-[#252525] px-2 py-1 text-[#e0e0e0]"
+              className="rounded border border-border bg-surface px-2 py-1 text-text-primary"
             />
           </Field>
           <Field label="End">
@@ -112,7 +112,7 @@ export function DateRangePicker({ fullStart, fullEnd, value, onChange }: Props) 
               min={toIsoDate(fullStart)}
               max={toIsoDate(fullEnd)}
               onChange={(e) => setCustomEnd(e.target.value)}
-              className="rounded border border-[#333] bg-[#252525] px-2 py-1 text-[#e0e0e0]"
+              className="rounded border border-border bg-surface px-2 py-1 text-text-primary"
             />
           </Field>
           <button
@@ -126,7 +126,7 @@ export function DateRangePicker({ fullStart, fullEnd, value, onChange }: Props) 
                 onChange({ kind: "custom", start: s, end });
               }
             }}
-            className="rounded bg-[#5dcaa5] px-3 py-1 font-medium text-[#0a1814] hover:bg-[#7fdab8]"
+            className="rounded bg-accent px-3 py-1 font-medium text-accent-contrast hover:opacity-90"
           >
             Apply
           </button>
@@ -151,8 +151,8 @@ function Preset({
       onClick={onClick}
       className={`rounded-full border px-3 py-1.5 transition-colors ${
         active
-          ? "border-[#5dcaa5] bg-[#1f2a26] text-[#e0e0e0]"
-          : "border-[#333] bg-[#252525] text-[#999] hover:border-[#555] hover:text-[#e0e0e0]"
+          ? "border-accent bg-accent-soft text-text-primary"
+          : "border-border bg-surface text-text-secondary hover:border-border-strong hover:text-text-primary"
       }`}
     >
       {children}
@@ -163,7 +163,7 @@ function Preset({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="text-[10px] uppercase tracking-wide text-[#666]">
+      <span className="text-[10px] uppercase tracking-wide text-text-muted">
         {label}
       </span>
       {children}

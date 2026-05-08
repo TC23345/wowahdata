@@ -3,7 +3,9 @@
 import { useMemo, useState } from "react";
 import type { PurchaseSaleRow } from "@/lib/csv";
 import { binToHeatmap, type HeatmapMode, type HeatmapTz } from "@/lib/heatmap";
-import { cellColor } from "./colorScale";
+import { fmtGold } from "@/lib/format";
+import { cellColor, getHeatmapStops } from "./colorScale";
+import { useTheme } from "@/lib/useTheme";
 
 type Props = {
   rows: PurchaseSaleRow[];
@@ -12,24 +14,22 @@ type Props = {
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 
-function fmtGold(g: number): string {
-  if (g === 0) return "0g";
-  if (g < 1) return `${(g * 100).toFixed(0)}s`;
-  if (g < 100) return `${g.toFixed(2)}g`;
-  if (g < 10_000) return `${g.toFixed(0)}g`;
-  return `${(g / 1000).toFixed(1)}kg`;
-}
-
 function fmtHourRange(h: number): string {
   return `${String(h).padStart(2, "0")}:00–${String(h).padStart(2, "0")}:59`;
 }
 
 export function SaleHeatmap({ rows, itemName }: Props) {
+  const theme = useTheme();
   const [mode, setMode] = useState<HeatmapMode>("units");
   const [tz, setTz] = useState<HeatmapTz>("local");
   const [hover, setHover] = useState<{ d: number; h: number } | null>(null);
 
   const matrix = useMemo(() => binToHeatmap(rows, mode, tz), [rows, mode, tz]);
+  // Resolve once per render. `theme` triggers re-render via useTheme(), so the
+  // freshly-read CSS-var stops always match the active theme. (Reading 11 CSS
+  // vars per render is cheap; no need to memoize.)
+  void theme;
+  const stops = getHeatmapStops();
 
   const hovered = hover ? matrix.cells[hover.d][hover.h] : null;
   const tzLabel = tz === "local"
@@ -39,14 +39,14 @@ export function SaleHeatmap({ rows, itemName }: Props) {
   return (
     <section
       aria-label={`Sale heatmap for ${itemName}`}
-      className="rounded-lg border border-[#333] bg-[#252525] p-5"
+      className="rounded-lg border border-border bg-surface p-5"
     >
       <header className="mb-4 flex flex-wrap items-baseline justify-between gap-3">
         <div>
-          <h2 className="text-base font-semibold text-[#e0e0e0]">
+          <h2 className="text-base font-semibold text-text-primary">
             {itemName}
           </h2>
-          <p className="text-xs text-[#999]">
+          <p className="text-xs text-text-secondary">
             {matrix.totalUnits.toLocaleString()} units sold ·{" "}
             {fmtGold(matrix.totalGold)} gross · {tzLabel}
           </p>
@@ -76,7 +76,7 @@ export function SaleHeatmap({ rows, itemName }: Props) {
           role="grid"
           aria-rowcount={8}
           aria-colcount={25}
-          className="grid w-full min-w-[640px] gap-0.5 text-xs text-[#999]"
+          className="grid w-full min-w-[640px] gap-0.5 text-xs text-text-secondary"
           style={{
             gridTemplateColumns: "44px repeat(24, minmax(0, 1fr))",
           }}
@@ -99,6 +99,7 @@ export function SaleHeatmap({ rows, itemName }: Props) {
               max={matrix.maxIntensity}
               mode={mode}
               dayIdx={d}
+              stops={stops}
               isHovered={(h) => hover?.d === d && hover.h === h}
               onHover={(h) => setHover({ d, h })}
               onLeave={() => setHover(null)}
@@ -109,14 +110,14 @@ export function SaleHeatmap({ rows, itemName }: Props) {
 
       <CellTooltip cell={hovered} mode={mode} />
 
-      <div className="mt-3 flex items-center gap-2 text-[10px] text-[#666]">
+      <div className="mt-3 flex items-center gap-2 text-[10px] text-text-muted">
         <span>0</span>
-        <Legend />
+        <Legend key={theme} />
         <span>{mode === "units" ? matrix.maxIntensity.toLocaleString() : fmtGold(matrix.maxIntensity)}</span>
         <span className="ml-3 inline-flex items-center gap-1">
           <span
-            className="inline-block h-3 w-3 rounded-sm border border-[#444]"
-            style={{ background: "#252525" }}
+            className="inline-block h-3 w-3 rounded-sm border border-border-strong"
+            style={{ background: "var(--surface)" }}
           />
           no data
         </span>
@@ -131,6 +132,7 @@ function DayRow({
   max,
   mode,
   dayIdx,
+  stops,
   isHovered,
   onHover,
   onLeave,
@@ -140,6 +142,7 @@ function DayRow({
   max: number;
   mode: HeatmapMode;
   dayIdx: number;
+  stops: string[];
   isHovered: (h: number) => boolean;
   onHover: (h: number) => void;
   onLeave: () => void;
@@ -148,13 +151,13 @@ function DayRow({
     <>
       <div
         role="rowheader"
-        className="flex items-center justify-end pr-3 text-right text-xs font-medium text-[#999]"
+        className="flex items-center justify-end pr-3 text-right text-xs font-medium text-text-secondary"
       >
         {day}
       </div>
       {cells.map((cell, h) => {
         const intensity = mode === "units" ? cell.units : cell.goldValue;
-        const bg = cellColor(intensity, max);
+        const bg = cellColor(intensity, max, stops);
         return (
           <button
             key={`${dayIdx}-${h}`}
@@ -188,7 +191,7 @@ function ToggleGroup<T extends string>({
   return (
     <div
       role="tablist"
-      className="inline-flex rounded-md border border-[#333] bg-[#1a1a1a] p-0.5"
+      className="inline-flex rounded-md border border-border bg-background p-0.5"
     >
       {options.map((o) => (
         <button
@@ -198,8 +201,8 @@ function ToggleGroup<T extends string>({
           onClick={() => onChange(o.value)}
           className={`rounded px-2.5 py-1 transition-colors ${
             o.value === value
-              ? "bg-[#333] text-[#e0e0e0]"
-              : "text-[#999] hover:text-[#e0e0e0]"
+              ? "bg-border text-text-primary"
+              : "text-text-secondary hover:text-text-primary"
           }`}
         >
           {o.label}
@@ -218,13 +221,13 @@ function CellTooltip({
 }) {
   if (!cell) {
     return (
-      <p className="mt-3 text-xs text-[#666]">
+      <p className="mt-3 text-xs text-text-muted">
         Hover a cell for details.
       </p>
     );
   }
   return (
-    <div className="mt-3 grid grid-cols-2 gap-x-6 gap-y-1 rounded border border-[#333] bg-[#1a1a1a] p-3 text-xs text-[#e0e0e0] sm:grid-cols-4">
+    <div className="mt-3 grid grid-cols-2 gap-x-6 gap-y-1 rounded border border-border bg-background p-3 text-xs text-text-primary sm:grid-cols-4">
       <Stat label="When" value={`${cell.day} ${fmtHourRange(cell.hour)}`} />
       <Stat label="Units" value={cell.units.toLocaleString()} highlight={mode === "units"} />
       <Stat label="Revenue" value={fmtGold(cell.goldValue)} highlight={mode === "revenue"} />
@@ -245,10 +248,10 @@ function Stat({
 }) {
   return (
     <div className="flex flex-col">
-      <span className="text-[10px] uppercase tracking-wide text-[#666]">
+      <span className="text-[10px] uppercase tracking-wide text-text-muted">
         {label}
       </span>
-      <span className={highlight ? "text-[#e0e0e0]" : "text-[#999]"}>
+      <span className={highlight ? "text-text-primary" : "text-text-secondary"}>
         {value}
       </span>
     </div>
@@ -256,13 +259,17 @@ function Stat({
 }
 
 function Legend() {
+  // Compose the gradient from the same CSS vars the heatmap cells read, so
+  // the legend always matches the active theme.
+  const gradient =
+    "linear-gradient(to right, " +
+    "var(--heatmap-0), var(--heatmap-1), var(--heatmap-2), var(--heatmap-3), " +
+    "var(--heatmap-4), var(--heatmap-5), var(--heatmap-6), var(--heatmap-7), " +
+    "var(--heatmap-8), var(--heatmap-9), var(--heatmap-10))";
   return (
     <div
       className="h-2 w-32 rounded-sm"
-      style={{
-        background:
-          "linear-gradient(to right, rgb(68,1,84), rgb(64,67,135), rgb(41,120,142), rgb(34,167,132), rgb(189,222,38), rgb(253,231,36))",
-      }}
+      style={{ background: gradient }}
     />
   );
 }
