@@ -213,3 +213,33 @@ export function buildPriceHistogram(
   for (const s of sells) ensure(copperToGold(s.price)).sellUnits += s.quantity;
   return [...map.values()].sort((a, b) => a.bucketStart - b.bucketStart);
 }
+
+export type HistogramSummary = {
+  medianBuyGold: number | null;
+  medianSellGold: number | null;
+  spreadGold: number | null; // sell − buy when both present
+};
+
+// Weighted median over price-bucket histograms. Bucket-aligned (resolution =
+// BUCKET_GOLD) since the underlying bins discard exact prices. Reports the
+// midpoint of the bucket containing the cumulative-50% unit.
+export function summarizeHistogram(bins: HistogramBin[]): HistogramSummary {
+  const median = (key: "buyUnits" | "sellUnits"): number | null => {
+    const total = bins.reduce((acc, b) => acc + b[key], 0);
+    if (total === 0) return null;
+    const half = total / 2;
+    let cum = 0;
+    for (const b of bins) {
+      cum += b[key];
+      if (cum >= half) return b.bucketStart + BUCKET_GOLD / 2;
+    }
+    return null;
+  };
+  const medianBuyGold = median("buyUnits");
+  const medianSellGold = median("sellUnits");
+  const spreadGold =
+    medianBuyGold !== null && medianSellGold !== null
+      ? medianSellGold - medianBuyGold
+      : null;
+  return { medianBuyGold, medianSellGold, spreadGold };
+}

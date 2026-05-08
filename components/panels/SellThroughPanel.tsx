@@ -35,24 +35,24 @@ export function SellThroughPanel({ data, activeItem }: Props) {
 
   if (rows.length === 0) {
     return (
-      <p className="rounded-lg border border-[#333] bg-[#252525] p-6 text-sm text-[#999]">
+      <p className="rounded-lg border border-border bg-surface p-6 text-sm text-text-secondary">
         Load some sales/expired data first.
       </p>
     );
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-[#333] bg-[#252525] p-4">
+    <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
       <header className="flex flex-wrap items-baseline justify-between gap-3">
         <div>
-          <h3 className="text-sm font-medium text-[#e0e0e0]">Sell-through</h3>
-          <p className="text-xs text-[#666]">
+          <h3 className="text-sm font-medium text-text-primary">Sell-through</h3>
+          <p className="text-xs text-text-muted">
             {sorted.length} item{sorted.length === 1 ? "" : "s"} ·{" "}
-            <span className="text-[#e24b4a]">red rows</span> = sell-through &lt;{" "}
+            <span className="text-loss">red rows</span> = sell-through &lt;{" "}
             {(SLOW_THRESHOLD * 100).toFixed(0)}%
           </p>
         </div>
-        <label className="flex items-center gap-1.5 text-xs text-[#999]">
+        <label className="flex items-center gap-1.5 text-xs text-text-secondary">
           <input
             type="checkbox"
             checked={hideEmpty}
@@ -61,9 +61,9 @@ export function SellThroughPanel({ data, activeItem }: Props) {
           Hide items with no sales+expired activity
         </label>
       </header>
-      <div className="max-h-[480px] overflow-auto rounded border border-[#333]">
+      <div className="max-h-[480px] overflow-auto rounded border border-border">
         <table className="w-full text-xs">
-          <thead className="sticky top-0 bg-[#1a1a1a] text-[10px] uppercase tracking-wide text-[#666]">
+          <thead className="sticky top-0 bg-background text-[10px] uppercase tracking-wide text-text-muted">
             <tr>
               <Th onClick={() => setSort("name")} active={sort === "name"} align="left">
                 Item
@@ -86,14 +86,14 @@ export function SellThroughPanel({ data, activeItem }: Props) {
               return (
                 <tr
                   key={r.name}
-                  className={`border-t border-[#333] ${
-                    isActive ? "bg-[#1f2a26]" : ""
-                  } ${slow ? "text-[#e24b4a]" : "text-[#e0e0e0]"}`}
+                  className={`border-t border-border ${
+                    isActive ? "bg-accent-soft" : ""
+                  } ${slow ? "text-loss" : "text-text-primary"}`}
                 >
                   <td className="px-3 py-1.5">
                     {r.name}
                     {r.isSynthetic && (
-                      <span className="ml-2 rounded bg-[#333] px-1 py-0.5 text-[9px] text-[#999]">
+                      <span className="ml-2 rounded bg-border px-1 py-0.5 text-[9px] text-text-secondary">
                         synthetic
                       </span>
                     )}
@@ -135,7 +135,7 @@ function Th({
       onClick={onClick}
       className={`cursor-pointer px-3 py-2 ${
         align === "right" ? "text-right" : "text-left"
-      } ${active ? "text-[#e0e0e0]" : ""}`}
+      } ${active ? "text-text-primary" : ""}`}
     >
       {children} {active ? "↓" : ""}
     </th>

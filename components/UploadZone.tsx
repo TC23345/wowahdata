@@ -69,15 +69,15 @@ export function UploadZone({ onLoaded }: Props) {
         }}
         className={`flex cursor-pointer flex-col items-center justify-center gap-3 rounded-lg border border-dashed p-12 text-center transition-colors ${
           dragActive
-            ? "border-[#5dcaa5] bg-[#1f2a26]"
-            : "border-[#444] bg-[#1a1a1a] hover:border-[#666]"
+            ? "border-accent bg-accent-soft"
+            : "border-border-strong bg-background hover:border-text-muted"
         }`}
       >
-        <p className="text-base text-[#e0e0e0]">
+        <p className="text-base text-text-primary">
           Drop your TSM CSV exports here
         </p>
-        <p className="max-w-md text-xs text-[#999]">
-          Files matching <code className="rounded bg-[#252525] px-1 py-0.5 text-[10px] text-[#e0e0e0]">Accounting_&lt;Realm&gt;_&lt;kind&gt;.csv</code>.
+        <p className="max-w-md text-xs text-text-secondary">
+          Files matching <code className="rounded bg-surface px-1 py-0.5 text-[10px] text-text-primary">Accounting_&lt;Realm&gt;_&lt;kind&gt;.csv</code>.
           Any subset works. Your data never leaves your browser — parsed in-page,
           stored locally in IndexedDB.
         </p>
@@ -96,7 +96,7 @@ export function UploadZone({ onLoaded }: Props) {
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="rounded border border-[#444] bg-[#252525] px-3 py-1.5 text-sm text-[#e0e0e0] hover:border-[#666]"
+          className="rounded border border-border-strong bg-surface px-3 py-1.5 text-sm text-text-primary hover:border-text-muted"
         >
           Browse files…
         </button>
@@ -107,11 +107,11 @@ export function UploadZone({ onLoaded }: Props) {
           type="button"
           onClick={onSample}
           disabled={busy !== "idle"}
-          className="rounded bg-[#5dcaa5] px-3 py-1.5 text-sm font-medium text-[#0a1814] hover:bg-[#7fdab8] disabled:opacity-50"
+          className="rounded bg-accent px-3 py-1.5 text-sm font-medium text-accent-contrast hover:opacity-90 disabled:opacity-50"
         >
           {busy === "sample" ? "Loading sample…" : "Load sample data"}
         </button>
-        <p className="text-xs text-[#666]">
+        <p className="text-xs text-text-muted">
           Uses a scrubbed Nightslayer export — Jan 21 to May 6, 2026 (8,510 sales rows).
         </p>
       </div>
@@ -119,14 +119,14 @@ export function UploadZone({ onLoaded }: Props) {
       {error && (
         <p
           role="alert"
-          className="rounded border border-[#5a2526] bg-[#2a1010] px-3 py-2 text-xs text-[#e24b4a]"
+          className="rounded border border-danger-border bg-danger-soft px-3 py-2 text-xs text-loss"
         >
           {error}
         </p>
       )}
 
       {busy === "parsing" && (
-        <p className="text-xs text-[#999]">Parsing your TSM export…</p>
+        <p className="text-xs text-text-secondary">Parsing your TSM export…</p>
       )}
     </section>
   );

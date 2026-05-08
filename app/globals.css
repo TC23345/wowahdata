@@ -1,34 +1,679 @@
 @import "tailwindcss";
 
 :root {
+  color-scheme: dark;
   --background: #1a1a1a;
   --surface: #252525;
+  --surface-raised: #1f1f1f;
+  --surface-muted: #1f2a26;
   --border: #333;
+  --border-strong: #555;
   --text-primary: #e0e0e0;
   --text-secondary: #999;
   --text-muted: #666;
+  --accent: #5dcaa5;
+  --accent-soft: #1f2a26;
+  --accent-contrast: #0a1814;
   --buy: rgb(29, 158, 117);
   --sell: rgb(83, 74, 183);
   --profit: #5dcaa5;
   --loss: #e24b4a;
+  --grid: #2a2a2a;
+  --danger-soft: #2a1010;
+  --danger-border: #5a2526;
+  --divider: #252525;
+  --shadow: rgba(0, 0, 0, 0.28);
+
+  --chart-grid: #2a2a2a;
+  --chart-stack-1: #7e5a99;
+  --chart-stack-2: #c0584c;
+  --chart-stack-3: #5a5a5a;
+
+  --heatmap-0: rgb(68, 1, 84);
+  --heatmap-1: rgb(72, 35, 116);
+  --heatmap-2: rgb(64, 67, 135);
+  --heatmap-3: rgb(52, 94, 141);
+  --heatmap-4: rgb(41, 120, 142);
+  --heatmap-5: rgb(32, 144, 140);
+  --heatmap-6: rgb(34, 167, 132);
+  --heatmap-7: rgb(68, 190, 112);
+  --heatmap-8: rgb(121, 209, 81);
+  --heatmap-9: rgb(189, 222, 38);
+  --heatmap-10: rgb(253, 231, 36);
+}
+
+[data-theme="midnight"] {
+  color-scheme: dark;
+  --background: #1a1a1a;
+  --surface: #252525;
+  --surface-raised: #1f1f1f;
+  --surface-muted: #1f2a26;
+  --border: #333;
+  --border-strong: #555;
+  --text-primary: #e0e0e0;
+  --text-secondary: #999;
+  --text-muted: #666;
+  --accent: #5dcaa5;
+  --accent-soft: #1f2a26;
+  --accent-contrast: #0a1814;
+  --buy: rgb(29, 158, 117);
+  --sell: rgb(83, 74, 183);
+  --profit: #5dcaa5;
+  --loss: #e24b4a;
+  --grid: #2a2a2a;
+  --danger-soft: #2a1010;
+  --danger-border: #5a2526;
+  --divider: #252525;
+  --shadow: rgba(0, 0, 0, 0.28);
+
+  --chart-grid: #2a2a2a;
+  --chart-stack-1: #7e5a99;
+  --chart-stack-2: #c0584c;
+  --chart-stack-3: #5a5a5a;
+
+  --heatmap-0: rgb(68, 1, 84);
+  --heatmap-1: rgb(72, 35, 116);
+  --heatmap-2: rgb(64, 67, 135);
+  --heatmap-3: rgb(52, 94, 141);
+  --heatmap-4: rgb(41, 120, 142);
+  --heatmap-5: rgb(32, 144, 140);
+  --heatmap-6: rgb(34, 167, 132);
+  --heatmap-7: rgb(68, 190, 112);
+  --heatmap-8: rgb(121, 209, 81);
+  --heatmap-9: rgb(189, 222, 38);
+  --heatmap-10: rgb(253, 231, 36);
+}
+
+[data-theme="ledger"] {
+  color-scheme: light;
+  --background: #f6f7f2;
+  --surface: #ffffff;
+  --surface-raised: #f0f2ec;
+  --surface-muted: #e6f3ee;
+  --border: #d7dacf;
+  --border-strong: #aeb5a9;
+  --text-primary: #20272a;
+  --text-secondary: #596166;
+  --text-muted: #7d8589;
+  --accent: #087f6f;
+  --accent-soft: #dff2ec;
+  --accent-contrast: #f6fffb;
+  --buy: rgb(12, 134, 110);
+  --sell: rgb(70, 93, 164);
+  --profit: #087f6f;
+  --loss: #bd3a35;
+  --grid: #e8eae3;
+  --danger-soft: #fae6e4;
+  --danger-border: #e4aaa5;
+  --divider: #e3e5dd;
+  --shadow: rgba(32, 39, 42, 0.12);
+
+  --chart-grid: #e0e3da;
+  --chart-stack-1: #b5934c;
+  --chart-stack-2: #b85040;
+  --chart-stack-3: #9aa399;
+
+  --heatmap-0: #fbf6e6;
+  --heatmap-1: #f4e9c4;
+  --heatmap-2: #ecd99a;
+  --heatmap-3: #e0c374;
+  --heatmap-4: #d2a955;
+  --heatmap-5: #c08a3e;
+  --heatmap-6: #a86b30;
+  --heatmap-7: #8c4f24;
+  --heatmap-8: #6f3a1d;
+  --heatmap-9: #532817;
+  --heatmap-10: #3a1a10;
+}
+
+[data-theme="cobalt"] {
+  color-scheme: dark;
+  --background: #111821;
+  --surface: #1d2630;
+  --surface-raised: #18212b;
+  --surface-muted: #202b28;
+  --border: #324050;
+  --border-strong: #516276;
+  --text-primary: #eef4f8;
+  --text-secondary: #a5b2bd;
+  --text-muted: #71808d;
+  --accent: #e4b84d;
+  --accent-soft: #342d1c;
+  --accent-contrast: #171106;
+  --buy: rgb(51, 168, 148);
+  --sell: rgb(92, 127, 213);
+  --profit: #3ed0aa;
+  --loss: #ff6f61;
+  --grid: #263240;
+  --danger-soft: #361918;
+  --danger-border: #7b3431;
+  --divider: #26313d;
+  --shadow: rgba(0, 0, 0, 0.32);
+
+  --chart-grid: #263240;
+  --chart-stack-1: #5c7fd5;
+  --chart-stack-2: #c87a3a;
+  --chart-stack-3: #4a5868;
+
+  --heatmap-0: #0a1525;
+  --heatmap-1: #0f2240;
+  --heatmap-2: #143058;
+  --heatmap-3: #1a4070;
+  --heatmap-4: #205088;
+  --heatmap-5: #2a65a0;
+  --heatmap-6: #3a80b8;
+  --heatmap-7: #4ea0ca;
+  --heatmap-8: #6cc0d8;
+  --heatmap-9: #9ce0e4;
+  --heatmap-10: #e4f2f8;
+}
+
+[data-theme="ember"] {
+  color-scheme: dark;
+  --background: #191715;
+  --surface: #272523;
+  --surface-raised: #211f1d;
+  --surface-muted: #293029;
+  --border: #3d3934;
+  --border-strong: #62594f;
+  --text-primary: #eee9df;
+  --text-secondary: #aaa196;
+  --text-muted: #776f66;
+  --accent: #68c3a1;
+  --accent-soft: #22352e;
+  --accent-contrast: #0b1712;
+  --buy: rgb(48, 163, 128);
+  --sell: rgb(137, 104, 198);
+  --profit: #68c3a1;
+  --loss: #e46959;
+  --grid: #312e2a;
+  --danger-soft: #331715;
+  --danger-border: #734036;
+  --divider: #302d29;
+  --shadow: rgba(0, 0, 0, 0.3);
+
+  --chart-grid: #312e2a;
+  --chart-stack-1: #8968c6;
+  --chart-stack-2: #c0584c;
+  --chart-stack-3: #5a5048;
+
+  --heatmap-0: #1a0e08;
+  --heatmap-1: #2a1810;
+  --heatmap-2: #3e2418;
+  --heatmap-3: #553220;
+  --heatmap-4: #6e4128;
+  --heatmap-5: #8c5230;
+  --heatmap-6: #b06438;
+  --heatmap-7: #d27840;
+  --heatmap-8: #e89248;
+  --heatmap-9: #f5b25a;
+  --heatmap-10: #ffd680;
+}
+
+/* ─── TBC Theme Pack ──────────────────────────────────────────────── */
+
+[data-theme="fel-forge"] {
+  color-scheme: dark;
+  --background: #0a0d0a;
+  --surface: #101410;
+  --surface-raised: #0d100d;
+  --surface-muted: #11211a;
+  --border: #1a3a1a;
+  --border-strong: #2a5a2a;
+  --text-primary: #d8f5d0;
+  --text-secondary: #8fb088;
+  --text-muted: #5a7a55;
+  --accent: #1eff00;
+  --accent-soft: #0f2a0a;
+  --accent-contrast: #051405;
+  --buy: rgb(60, 200, 80);
+  --sell: rgb(140, 90, 200);
+  --profit: #5dff5d;
+  --loss: #ff4d4d;
+  --grid: #1a3a1a;
+  --danger-soft: #2a0d0d;
+  --danger-border: #5a2020;
+  --divider: #15281a;
+  --shadow: rgba(0, 0, 0, 0.5);
+
+  --chart-grid: #1a3a1a;
+  --chart-stack-1: #2a6a2a;
+  --chart-stack-2: #8a2a2a;
+  --chart-stack-3: #3a3a3a;
+
+  --heatmap-0: #050a05;
+  --heatmap-1: #0a1a0a;
+  --heatmap-2: #102a10;
+  --heatmap-3: #143d14;
+  --heatmap-4: #1a521a;
+  --heatmap-5: #226a22;
+  --heatmap-6: #2a8a2a;
+  --heatmap-7: #36b036;
+  --heatmap-8: #44d044;
+  --heatmap-9: #6cf04a;
+  --heatmap-10: #1eff00;
+}
+
+[data-theme="sunwell"] {
+  color-scheme: dark;
+  --background: #1a0f06;
+  --surface: #2a1810;
+  --surface-raised: #221208;
+  --surface-muted: #321a10;
+  --border: #3a2818;
+  --border-strong: #5e4028;
+  --text-primary: #f0e6d0;
+  --text-secondary: #c9b890;
+  --text-muted: #8a7858;
+  --accent: #c9a24a;
+  --accent-soft: #3a2818;
+  --accent-contrast: #1a0f06;
+  --buy: rgb(201, 162, 74);
+  --sell: rgb(160, 64, 48);
+  --profit: #e8c167;
+  --loss: #a04030;
+  --grid: #3a2818;
+  --danger-soft: #2a1008;
+  --danger-border: #5a2418;
+  --divider: #2e1a10;
+  --shadow: rgba(0, 0, 0, 0.4);
+
+  --chart-grid: #3a2818;
+  --chart-stack-1: #a8742a;
+  --chart-stack-2: #8c2820;
+  --chart-stack-3: #c9a878;
+
+  --heatmap-0: #1a0904;
+  --heatmap-1: #2a0e08;
+  --heatmap-2: #3e1810;
+  --heatmap-3: #582818;
+  --heatmap-4: #7a3e1c;
+  --heatmap-5: #9a5820;
+  --heatmap-6: #b87828;
+  --heatmap-7: #d29a36;
+  --heatmap-8: #e8b850;
+  --heatmap-9: #f4d480;
+  --heatmap-10: #faecbf;
+}
+
+[data-theme="black-temple"] {
+  color-scheme: dark;
+  --background: #0d100d;
+  --surface: #1a1f1a;
+  --surface-raised: #141814;
+  --surface-muted: #18261e;
+  --border: #243024;
+  --border-strong: #3e5040;
+  --text-primary: #d8e8d8;
+  --text-secondary: #93a896;
+  --text-muted: #5e706a;
+  --accent: #2dd17a;
+  --accent-soft: #15301f;
+  --accent-contrast: #061a0e;
+  --buy: rgb(45, 209, 122);
+  --sell: rgb(140, 100, 80);
+  --profit: #5dff8a;
+  --loss: #ff6b3d;
+  --grid: #1f2820;
+  --danger-soft: #281410;
+  --danger-border: #5a2820;
+  --divider: #1d231d;
+  --shadow: rgba(0, 0, 0, 0.45);
+
+  --chart-grid: #1f2820;
+  --chart-stack-1: #2dd17a;
+  --chart-stack-2: #a8542a;
+  --chart-stack-3: #4a5a52;
+
+  --heatmap-0: #07100b;
+  --heatmap-1: #0c1a12;
+  --heatmap-2: #122a1c;
+  --heatmap-3: #173e28;
+  --heatmap-4: #1c5634;
+  --heatmap-5: #226e42;
+  --heatmap-6: #2a8a52;
+  --heatmap-7: #34a864;
+  --heatmap-8: #44c878;
+  --heatmap-9: #66e890;
+  --heatmap-10: #a8ff80;
+}
+
+[data-theme="illidari"] {
+  color-scheme: dark;
+  --background: #0d0b14;
+  --surface: #161122;
+  --surface-raised: #110e1c;
+  --surface-muted: #1c1828;
+  --border: #2a2240;
+  --border-strong: #4a3a6a;
+  --text-primary: #e0d8f0;
+  --text-secondary: #a89cc4;
+  --text-muted: #6a608a;
+  --accent: #5cf0e8;
+  --accent-soft: #1a2a38;
+  --accent-contrast: #051818;
+  --buy: rgb(92, 240, 232);
+  --sell: rgb(157, 78, 221);
+  --profit: #5cf0e8;
+  --loss: #e24b4a;
+  --grid: #2a2240;
+  --danger-soft: #2a1018;
+  --danger-border: #5a2030;
+  --divider: #1f1830;
+  --shadow: rgba(0, 0, 0, 0.5);
+
+  --chart-grid: #2a2240;
+  --chart-stack-1: #9d4edd;
+  --chart-stack-2: #d63384;
+  --chart-stack-3: #5cf0e8;
+
+  --heatmap-0: #06050f;
+  --heatmap-1: #0e0a1e;
+  --heatmap-2: #18102e;
+  --heatmap-3: #261a44;
+  --heatmap-4: #38245a;
+  --heatmap-5: #4e2e74;
+  --heatmap-6: #6a3a92;
+  --heatmap-7: #8848b0;
+  --heatmap-8: #a060c8;
+  --heatmap-9: #80b4dc;
+  --heatmap-10: #5cf0e8;
+}
+
+[data-theme="outland"] {
+  color-scheme: dark;
+  --background: #1a0f08;
+  --surface: #2a1a10;
+  --surface-raised: #22140a;
+  --surface-muted: #322014;
+  --border: #3e2a18;
+  --border-strong: #6a4628;
+  --text-primary: #f0d0a8;
+  --text-secondary: #c0a078;
+  --text-muted: #806848;
+  --accent: #c45a2c;
+  --accent-soft: #3a2010;
+  --accent-contrast: #1a0a04;
+  --buy: rgb(196, 90, 44);
+  --sell: rgb(120, 88, 158);
+  --profit: #ffaa55;
+  --loss: #992020;
+  --grid: #3e2a18;
+  --danger-soft: #2a0808;
+  --danger-border: #5e1a1a;
+  --divider: #2c1c10;
+  --shadow: rgba(0, 0, 0, 0.45);
+
+  --chart-grid: #3e2a18;
+  --chart-stack-1: #c45a2c;
+  --chart-stack-2: #8a2818;
+  --chart-stack-3: #6a584a;
+
+  --heatmap-0: #100804;
+  --heatmap-1: #20100a;
+  --heatmap-2: #321a10;
+  --heatmap-3: #4a2614;
+  --heatmap-4: #6a361a;
+  --heatmap-5: #8c481c;
+  --heatmap-6: #ae5c20;
+  --heatmap-7: #ce7028;
+  --heatmap-8: #e88a3c;
+  --heatmap-9: #f4ac5a;
+  --heatmap-10: #ffd082;
+}
+
+[data-theme="arcane"] {
+  color-scheme: dark;
+  --background: #08081a;
+  --surface: rgba(40, 40, 80, 0.6);
+  --surface-raised: rgba(50, 50, 100, 0.55);
+  --surface-muted: rgba(60, 60, 120, 0.5);
+  --border: #2a2a5a;
+  --border-strong: #4a4a8a;
+  --text-primary: #e8e4ff;
+  --text-secondary: #a8a0d8;
+  --text-muted: #6c649a;
+  --accent: #a98cff;
+  --accent-soft: #1c1830;
+  --accent-contrast: #07061a;
+  --buy: rgb(168, 255, 203);
+  --sell: rgb(126, 214, 255);
+  --profit: #a8ffcb;
+  --loss: #ff7799;
+  --grid: #2a2a5a;
+  --danger-soft: #261020;
+  --danger-border: #5a2040;
+  --divider: #1a1a40;
+  --shadow: rgba(0, 0, 30, 0.6);
+
+  --chart-grid: #2a2a5a;
+  --chart-stack-1: #a98cff;
+  --chart-stack-2: #7ed6ff;
+  --chart-stack-3: #c8c0e8;
+
+  --heatmap-0: #08081a;
+  --heatmap-1: #10102e;
+  --heatmap-2: #1c1846;
+  --heatmap-3: #2c2660;
+  --heatmap-4: #40347e;
+  --heatmap-5: #58449a;
+  --heatmap-6: #7458b8;
+  --heatmap-7: #9070d2;
+  --heatmap-8: #ac8ce8;
+  --heatmap-9: #c8b0f4;
+  --heatmap-10: #e8dcff;
+}
+
+[data-theme="naaru"] {
+  color-scheme: dark;
+  --background: #1d1a26;
+  --surface: #2a2535;
+  --surface-raised: #221d2c;
+  --surface-muted: #2f2a3e;
+  --border: #3a3450;
+  --border-strong: #564e72;
+  --text-primary: #f5efff;
+  --text-secondary: #cfc4e0;
+  --text-muted: #8a82a0;
+  --accent: #cdb8ff;
+  --accent-soft: #2c2740;
+  --accent-contrast: #150f1f;
+  --buy: rgb(168, 230, 255);
+  --sell: rgb(205, 184, 255);
+  --profit: #c5f5d8;
+  --loss: #ff9fb8;
+  --grid: #3a3450;
+  --danger-soft: #2a1820;
+  --danger-border: #5a3848;
+  --divider: #2d2738;
+  --shadow: rgba(0, 0, 0, 0.35);
+
+  --chart-grid: #3a3450;
+  --chart-stack-1: #cdb8ff;
+  --chart-stack-2: #a8e6ff;
+  --chart-stack-3: #f0c8d8;
+
+  --heatmap-0: #1a1626;
+  --heatmap-1: #2a2440;
+  --heatmap-2: #3a3258;
+  --heatmap-3: #4c4274;
+  --heatmap-4: #6258a0;
+  --heatmap-5: #8276c4;
+  --heatmap-6: #a092dc;
+  --heatmap-7: #beb0ec;
+  --heatmap-8: #d8caf6;
+  --heatmap-9: #ece0fc;
+  --heatmap-10: #f8eeff;
+}
+
+[data-theme="dh-tattoo"] {
+  color-scheme: dark;
+  --background: #000000;
+  --surface: #0a0a0a;
+  --surface-raised: #050505;
+  --surface-muted: #0f1410;
+  --border: #1a1a1a;
+  --border-strong: #2a2a2a;
+  --text-primary: #cccccc;
+  --text-secondary: #888888;
+  --text-muted: #555555;
+  --accent: #00ff7f;
+  --accent-soft: #051a10;
+  --accent-contrast: #000503;
+  --buy: rgb(0, 255, 127);
+  --sell: rgb(120, 120, 120);
+  --profit: #00ff7f;
+  --loss: #ff3333;
+  --grid: #1a1a1a;
+  --danger-soft: #200505;
+  --danger-border: #4a1010;
+  --divider: #0a0a0a;
+  --shadow: rgba(0, 0, 0, 0.7);
+
+  --chart-grid: #1a1a1a;
+  --chart-stack-1: #00ff7f;
+  --chart-stack-2: #aa1818;
+  --chart-stack-3: #4a4a4a;
+
+  --heatmap-0: #000000;
+  --heatmap-1: #050d08;
+  --heatmap-2: #081a10;
+  --heatmap-3: #0a2818;
+  --heatmap-4: #0c3820;
+  --heatmap-5: #0e4a28;
+  --heatmap-6: #106030;
+  --heatmap-7: #127a3c;
+  --heatmap-8: #14984c;
+  --heatmap-9: #1cc060;
+  --heatmap-10: #00ff7f;
+}
+
+[data-theme="auction-ledger"] {
+  color-scheme: light;
+  --background: #f0e6d0;
+  --surface: #e8dcc0;
+  --surface-raised: #f6ecd6;
+  --surface-muted: #e0d2b0;
+  --border: #c0a880;
+  --border-strong: #9a8458;
+  --text-primary: #2a1810;
+  --text-secondary: #5a3e28;
+  --text-muted: #8a6e50;
+  --accent: #7a4a1c;
+  --accent-soft: #ddc99a;
+  --accent-contrast: #fff8e8;
+  --buy: rgb(58, 122, 58);
+  --sell: rgb(122, 74, 28);
+  --profit: #3a7a3a;
+  --loss: #a02020;
+  --grid: #c0a880;
+  --danger-soft: #f0d8d2;
+  --danger-border: #c08878;
+  --divider: #d8c8a8;
+  --shadow: rgba(80, 50, 20, 0.18);
+
+  --chart-grid: #c8b088;
+  --chart-stack-1: #7a4a1c;
+  --chart-stack-2: #a02828;
+  --chart-stack-3: #8a7858;
+
+  --heatmap-0: #f8eed4;
+  --heatmap-1: #f0e0b6;
+  --heatmap-2: #e6cc92;
+  --heatmap-3: #d8b06a;
+  --heatmap-4: #c89048;
+  --heatmap-5: #b6702c;
+  --heatmap-6: #a4521a;
+  --heatmap-7: #8e3818;
+  --heatmap-8: #762818;
+  --heatmap-9: #5e1c18;
+  --heatmap-10: #3e1010;
+}
+
+[data-theme="karazhan"] {
+  color-scheme: dark;
+  --background: #10162a;
+  --surface: #181f3a;
+  --surface-raised: #131a30;
+  --surface-muted: #20243a;
+  --border: #262e4c;
+  --border-strong: #3e4870;
+  --text-primary: #e8d8b8;
+  --text-secondary: #b8a888;
+  --text-muted: #7e7058;
+  --accent: #d4a85c;
+  --accent-soft: #2a2030;
+  --accent-contrast: #14100a;
+  --buy: rgb(212, 168, 92);
+  --sell: rgb(120, 90, 130);
+  --profit: #d4a85c;
+  --loss: #a04050;
+  --grid: #20264a;
+  --danger-soft: #2a1018;
+  --danger-border: #5a2030;
+  --divider: #1c2240;
+  --shadow: rgba(0, 0, 0, 0.5);
+
+  --chart-grid: #20264a;
+  --chart-stack-1: #d4a85c;
+  --chart-stack-2: #6a1f30;
+  --chart-stack-3: #3a4060;
+
+  --heatmap-0: #0a0e1c;
+  --heatmap-1: #121838;
+  --heatmap-2: #1c224c;
+  --heatmap-3: #2a2452;
+  --heatmap-4: #3a2452;
+  --heatmap-5: #4a204c;
+  --heatmap-6: #5a2040;
+  --heatmap-7: #7a3838;
+  --heatmap-8: #a06438;
+  --heatmap-9: #c48a40;
+  --heatmap-10: #f0c870;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-muted: var(--surface-muted);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-contrast: var(--accent-contrast);
   --color-buy: var(--buy);
   --color-sell: var(--sell);
   --color-profit: var(--profit);
   --color-loss: var(--loss);
+  --color-grid: var(--grid);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-border: var(--danger-border);
+  --color-divider: var(--divider);
+
+  --color-chart-grid: var(--chart-grid);
+  --color-chart-stack-1: var(--chart-stack-1);
+  --color-chart-stack-2: var(--chart-stack-2);
+  --color-chart-stack-3: var(--chart-stack-3);
+
+  --color-heatmap-0: var(--heatmap-0);
+  --color-heatmap-1: var(--heatmap-1);
+  --color-heatmap-2: var(--heatmap-2);
+  --color-heatmap-3: var(--heatmap-3);
+  --color-heatmap-4: var(--heatmap-4);
+  --color-heatmap-5: var(--heatmap-5);
+  --color-heatmap-6: var(--heatmap-6);
+  --color-heatmap-7: var(--heatmap-7);
+  --color-heatmap-8: var(--heatmap-8);
+  --color-heatmap-9: var(--heatmap-9);
+  --color-heatmap-10: var(--heatmap-10);
 }
 
 body {
+  background: var(--background);
+  color: var(--text-primary);
   font-family: system-ui, -apple-system, sans-serif;
-}
-
-html {
-  color-scheme: dark;
 }

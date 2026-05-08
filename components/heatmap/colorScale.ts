@@ -1,45 +1,69 @@
-// Discrete viridis-like ramp. Hand-rolled to avoid pulling in d3-scale-chromatic.
-// Stops sampled from the viridis colormap at evenly-spaced t values.
-const STOPS: Array<[number, number, number]> = [
-  [68, 1, 84],     // t=0.00 — deep purple
-  [72, 35, 116],   // t=0.20
-  [64, 67, 135],   // t=0.30
-  [52, 94, 141],   // t=0.40
-  [41, 120, 142],  // t=0.50 — teal
-  [32, 144, 140],  // t=0.60
-  [34, 167, 132],  // t=0.70
-  [68, 190, 112],  // t=0.80
-  [121, 209, 81],  // t=0.85 — green
-  [189, 222, 38],  // t=0.92
-  [253, 231, 36],  // t=1.00 — yellow
+// Theme-aware heatmap ramp. Stops are read from the active theme's CSS custom
+// properties (`--heatmap-0` through `--heatmap-10`) at call time, so a theme
+// swap repaints the heatmap without any addt'l plumbing.
+//
+// Each cellColor() call resolves the ramp once. Callers that paint many cells
+// (e.g. SaleHeatmap) should use the same colorScale instance per render via
+// `getHeatmapStops()` if perf becomes a concern; in practice 7×24 = 168 cells
+// is fine.
+
+const STOP_COUNT = 11;
+
+// Reasonable viridis-ish fallback for SSR / before CSS vars resolve.
+const FALLBACK_STOPS: string[] = [
+  "rgb(68, 1, 84)",
+  "rgb(72, 35, 116)",
+  "rgb(64, 67, 135)",
+  "rgb(52, 94, 141)",
+  "rgb(41, 120, 142)",
+  "rgb(32, 144, 140)",
+  "rgb(34, 167, 132)",
+  "rgb(68, 190, 112)",
+  "rgb(121, 209, 81)",
+  "rgb(189, 222, 38)",
+  "rgb(253, 231, 36)",
 ];
 
-function lerp(a: number, b: number, t: number): number {
-  return a + (b - a) * t;
-}
-
-export function viridis(t: number): string {
-  const clamped = Math.max(0, Math.min(1, t));
-  const scaled = clamped * (STOPS.length - 1);
-  const i = Math.floor(scaled);
-  const f = scaled - i;
-  if (i >= STOPS.length - 1) {
-    const [r, g, b] = STOPS[STOPS.length - 1];
-    return `rgb(${r}, ${g}, ${b})`;
+export function getHeatmapStops(): string[] {
+  if (typeof window === "undefined") return FALLBACK_STOPS;
+  const cs = getComputedStyle(document.documentElement);
+  const stops: string[] = [];
+  for (let i = 0; i < STOP_COUNT; i++) {
+    const v = cs.getPropertyValue(`--heatmap-${i}`).trim();
+    stops.push(v.length > 0 ? v : FALLBACK_STOPS[i]);
   }
-  const [r1, g1, b1] = STOPS[i];
-  const [r2, g2, b2] = STOPS[i + 1];
-  const r = Math.round(lerp(r1, r2, f));
-  const g = Math.round(lerp(g1, g2, f));
-  const b = Math.round(lerp(b1, b2, f));
-  return `rgb(${r}, ${g}, ${b})`;
+  return stops;
 }
 
-// Returns the cell color OR the surface color when the cell is empty.
-// "No data" must look different from "sold zero."
+export function getSurfaceColor(): string {
+  if (typeof window === "undefined") return "#252525";
+  const v = getComputedStyle(document.documentElement)
+    .getPropertyValue("--surface")
+    .trim();
+  return v.length > 0 ? v : "#252525";
+}
+
+// Picks the discrete stop closest to the normalized intensity. We don't
+// interpolate between stops here because (a) the CSS variable values may be
+// hex/named colors that aren't trivially lerpable, and (b) discrete cells
+// already read fine at 11 levels.
+export function rampColor(t: number, stops: string[] = getHeatmapStops()): string {
+  const clamped = Math.max(0, Math.min(1, t));
+  const idx = Math.round(clamped * (stops.length - 1));
+  return stops[idx];
+}
+
+// Backward-compat: surface color used to live as a constant. Kept as a getter
+// for callers that imported the symbol; new callers should use getSurfaceColor().
 export const SURFACE_COLOR = "#252525";
 
-export function cellColor(intensity: number, max: number): string {
-  if (intensity <= 0 || max <= 0) return SURFACE_COLOR;
-  return viridis(intensity / max);
+export function cellColor(
+  intensity: number,
+  max: number,
+  stops?: string[],
+): string {
+  if (intensity <= 0 || max <= 0) {
+    return getSurfaceColor();
+  }
+  return rampColor(intensity / max, stops);
 }

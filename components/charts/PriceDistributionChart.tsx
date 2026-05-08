@@ -3,8 +3,14 @@
 import { useMemo } from "react";
 import { Chart } from "react-chartjs-2";
 import type { PurchaseSaleRow } from "@/lib/csv";
-import { buildPriceHistogram } from "@/lib/charts";
-import { COLORS, ensureChartsRegistered } from "./chartjsSetup";
+import { buildPriceHistogram, summarizeHistogram } from "@/lib/charts";
+import { fmtGold } from "@/lib/format";
+import {
+  applyChartDefaults,
+  ensureChartsRegistered,
+  getChartColors,
+} from "./chartjsSetup";
+import { useTheme } from "@/lib/useTheme";
 
 ensureChartsRegistered();
 
@@ -15,15 +21,20 @@ type Props = {
 };
 
 export function PriceDistributionChart({ buys, sells, itemName }: Props) {
+  const theme = useTheme();
   const bins = useMemo(() => buildPriceHistogram(buys, sells), [buys, sells]);
+  const summary = useMemo(() => summarizeHistogram(bins), [bins]);
 
   if (bins.length === 0) {
     return (
-      <p className="rounded-lg border border-[#333] bg-[#252525] p-6 text-sm text-[#999]">
+      <p className="rounded-lg border border-border bg-surface p-6 text-sm text-text-secondary">
         No price data for {itemName} in this range.
       </p>
     );
   }
+
+  applyChartDefaults();
+  const c = getChartColors();
 
   const labels = bins.map((b) => b.bucketStart.toFixed(2));
   const chartData = {
@@ -33,16 +44,16 @@ export function PriceDistributionChart({ buys, sells, itemName }: Props) {
         type: "bar" as const,
         label: "Buys (units)",
         data: bins.map((b) => b.buyUnits),
-        backgroundColor: COLORS.buyFill,
-        borderColor: COLORS.buyStroke,
+        backgroundColor: c.buyFill,
+        borderColor: c.buyStroke,
         borderWidth: 1,
       },
       {
         type: "bar" as const,
         label: "Sells (units)",
         data: bins.map((b) => b.sellUnits),
-        backgroundColor: COLORS.sellFill,
-        borderColor: COLORS.sellStroke,
+        backgroundColor: c.sellFill,
+        borderColor: c.sellStroke,
         borderWidth: 1,
       },
     ],
@@ -53,33 +64,92 @@ export function PriceDistributionChart({ buys, sells, itemName }: Props) {
     maintainAspectRatio: false,
     scales: {
       x: {
-        title: { display: true, text: "Gold per unit (0.25g buckets)", color: COLORS.text },
-        ticks: { color: COLORS.text, autoSkip: true, maxTicksLimit: 16 },
-        grid: { color: "#2a2a2a" },
+        title: { display: true, text: "Gold per unit (0.25g buckets)", color: c.text },
+        ticks: { color: c.text, autoSkip: true, maxTicksLimit: 16 },
+        grid: { color: c.grid },
       },
       y: {
-        title: { display: true, text: "Total units", color: COLORS.text },
+        title: { display: true, text: "Total units", color: c.text },
         beginAtZero: true,
-        ticks: { color: COLORS.text },
-        grid: { color: "#2a2a2a" },
+        ticks: { color: c.text },
+        grid: { color: c.grid },
       },
     },
     plugins: {
-      legend: { labels: { color: "#e0e0e0" } },
+      legend: { labels: { color: c.text } },
     },
   };
 
   return (
-    <div className="rounded-lg border border-[#333] bg-[#252525] p-4">
+    <div className="rounded-lg border border-border bg-surface p-4">
       <header className="mb-2">
-        <h3 className="text-sm font-medium text-[#e0e0e0]">Price distribution</h3>
-        <p className="text-xs text-[#666]">
+        <h3 className="text-sm font-medium text-text-primary">Price distribution</h3>
+        <p className="text-xs text-text-muted">
           Spread between buy floor and sell ceiling for {itemName}
         </p>
       </header>
+      <SummaryStrip summary={summary} />
       <div className="h-[clamp(320px,45vh,560px)]">
-        <Chart type="bar" data={chartData} options={options} />
+        <Chart key={theme} type="bar" data={chartData} options={options} />
       </div>
+    </div>
+  );
+}
+
+function SummaryStrip({
+  summary,
+}: {
+  summary: ReturnType<typeof summarizeHistogram>;
+}) {
+  const { medianBuyGold, medianSellGold, spreadGold } = summary;
+  const spreadPositive = spreadGold !== null && spreadGold > 0;
+  return (
+    <div
+      className="mb-3 grid grid-cols-3 gap-2"
+      title="Bucket-aligned weighted medians (0.25g resolution). Spread = median sell − median buy."
+    >
+      <SummaryCell label="Median buy" value={fmtOrDash(medianBuyGold)} />
+      <SummaryCell label="Median sell" value={fmtOrDash(medianSellGold)} />
+      <SummaryCell
+        label="Spread"
+        value={spreadGold === null ? "—" : fmtGold(spreadGold, true)}
+        valueClass={
+          spreadGold === null
+            ? undefined
+            : spreadPositive
+              ? "text-profit"
+              : "text-loss"
+        }
+      />
+    </div>
+  );
+}
+
+function fmtOrDash(g: number | null): string {
+  return g === null ? "—" : fmtGold(g);
+}
+
+function SummaryCell({
+  label,
+  value,
+  valueClass,
+}: {
+  label: string;
+  value: string;
+  valueClass?: string;
+}) {
+  return (
+    <div className="rounded-md border border-border bg-surface-raised px-3 py-2">
+      <p className="text-[10px] font-medium uppercase tracking-wide text-text-muted">
+        {label}
+      </p>
+      <p
+        className={`mt-0.5 text-sm font-semibold tabular-nums ${
+          valueClass ?? "text-text-primary"
+        }`}
+      >
+        {value}
+      </p>
     </div>
   );
 }

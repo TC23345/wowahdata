@@ -46,6 +46,7 @@ export function ItemChips({ items, value, onChange }: Props) {
 
   return (
     <div className="flex flex-wrap items-center gap-1.5">
+      <ItemSearchInput items={items} value={value} onChange={onChange} />
       {visibleChips.map((item) => (
         <Chip
           key={item.name}
@@ -64,7 +65,6 @@ export function ItemChips({ items, value, onChange }: Props) {
           showCuratedBadge={!isCurated(activePinned.name)}
         />
       )}
-      <ItemSearchInput items={items} value={value} onChange={onChange} />
     </div>
   );
 }
@@ -88,8 +88,8 @@ function Chip({
     <span
       className={`inline-flex items-center overflow-hidden rounded-full border text-xs ${
         active
-          ? "border-[#5dcaa5] bg-[#1f2a26] text-[#e0e0e0]"
-          : "border-[#333] bg-[#252525] text-[#999] hover:border-[#555] hover:text-[#e0e0e0]"
+          ? "border-accent bg-accent-soft text-text-primary"
+          : "border-border bg-surface text-text-secondary hover:border-border-strong hover:text-text-primary"
       }`}
     >
       <button
@@ -100,18 +100,18 @@ function Chip({
         <span>{item.name}</span>
         <span
           className={`rounded px-1 py-0.5 text-[10px] tabular-nums ${
-            active ? "bg-[#0e1916] text-[#5dcaa5]" : "bg-[#1a1a1a] text-[#666]"
+            active ? "bg-background text-accent" : "bg-background text-text-muted"
           }`}
         >
           {formatCount(item.txnCount)}
         </span>
         {item.isSynthetic && (
-          <span className="rounded bg-[#333] px-1 py-0.5 text-[9px] uppercase tracking-wide text-[#999]">
+          <span className="rounded bg-border px-1 py-0.5 text-[9px] uppercase tracking-wide text-text-secondary">
             DE
           </span>
         )}
         {showCuratedBadge && !item.isSynthetic && (
-          <span className="rounded bg-[#333] px-1 py-0.5 text-[9px] uppercase tracking-wide text-[#999]">
+          <span className="rounded bg-border px-1 py-0.5 text-[9px] uppercase tracking-wide text-text-secondary">
             search
           </span>
         )}
@@ -124,7 +124,7 @@ function Chip({
             e.stopPropagation();
             onDismiss?.();
           }}
-          className="border-l border-[#5dcaa5]/40 px-2 py-1.5 text-[#5dcaa5] hover:bg-[#0e1916]"
+          className="border-l border-accent/40 px-2 py-1.5 text-accent hover:bg-background"
         >
           ×
         </button>
@@ -172,8 +172,8 @@ function ItemSearchInput({
   return (
     <div ref={containerRef} className="relative inline-block">
       <div
-        className={`flex items-center rounded-full border bg-[#1a1a1a] transition-colors ${
-          open ? "border-[#666]" : "border-[#333] hover:border-[#555]"
+        className={`flex items-center rounded-full border bg-background transition-colors ${
+          open ? "border-text-muted" : "border-border hover:border-border-strong"
         }`}
       >
         <SearchIcon />
@@ -195,13 +195,13 @@ function ItemSearchInput({
             }
           }}
           placeholder={`Search ${items.length.toLocaleString()} items…`}
-          className="w-44 bg-transparent py-1.5 pr-3 text-xs text-[#e0e0e0] outline-none placeholder:text-[#666]"
+          className="w-44 bg-transparent py-1.5 pr-3 text-xs text-text-primary outline-none placeholder:text-text-muted"
         />
       </div>
       {open && results.length > 0 && (
         <ul
           role="listbox"
-          className="absolute right-0 z-20 mt-2 max-h-72 w-72 overflow-auto rounded-md border border-[#333] bg-[#1a1a1a] shadow-xl"
+          className="absolute left-0 z-20 mt-2 max-h-72 w-72 overflow-auto rounded-md border border-border bg-background shadow-xl"
         >
           {results.map((i) => (
             <li key={i.name}>
@@ -210,14 +210,14 @@ function ItemSearchInput({
                 role="option"
                 aria-selected={i.name === value}
                 onClick={() => select(i.name)}
-                className={`flex w-full items-center justify-between gap-2 px-3 py-1.5 text-left text-sm hover:bg-[#252525] ${
+                className={`flex w-full items-center justify-between gap-2 px-3 py-1.5 text-left text-sm hover:bg-surface ${
                   i.name === value
-                    ? "bg-[#252525] text-[#e0e0e0]"
-                    : "text-[#999]"
+                    ? "bg-surface text-text-primary"
+                    : "text-text-secondary"
                 }`}
               >
                 <span className="truncate">{i.name}</span>
-                <span className="shrink-0 text-xs text-[#666]">
+                <span className="shrink-0 text-xs text-text-muted">
                   {i.txnCount.toLocaleString()}
                 </span>
               </button>
@@ -226,8 +226,8 @@ function ItemSearchInput({
         </ul>
       )}
       {open && query.trim() && results.length === 0 && (
-        <div className="absolute right-0 z-20 mt-2 w-72 rounded-md border border-[#333] bg-[#1a1a1a] px-3 py-3 text-center text-xs text-[#666] shadow-xl">
-          No items match "{query}".
+        <div className="absolute left-0 z-20 mt-2 w-72 rounded-md border border-border bg-background px-3 py-3 text-center text-xs text-text-muted shadow-xl">
+          No items match &quot;{query}&quot;.
         </div>
       )}
     </div>
@@ -241,7 +241,7 @@ function SearchIcon() {
       height="14"
       viewBox="0 0 16 16"
       fill="none"
-      className="ml-3 mr-1.5 shrink-0 text-[#666]"
+      className="ml-3 mr-1.5 shrink-0 text-text-muted"
       aria-hidden
     >
       <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.5" />

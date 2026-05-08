@@ -4,7 +4,12 @@ import { useMemo } from "react";
 import { Chart } from "react-chartjs-2";
 import type { ExpiredCanceledRow, PurchaseSaleRow } from "@/lib/csv";
 import { buildDailyPnL } from "@/lib/charts";
-import { COLORS, ensureChartsRegistered } from "./chartjsSetup";
+import {
+  applyChartDefaults,
+  ensureChartsRegistered,
+  getChartColors,
+} from "./chartjsSetup";
+import { useTheme } from "@/lib/useTheme";
 
 ensureChartsRegistered();
 
@@ -17,6 +22,7 @@ type Props = {
 };
 
 export function DailyPnLChart({ buys, sells, expired, canceled, itemName }: Props) {
+  const theme = useTheme();
   const series = useMemo(
     () => buildDailyPnL(buys, sells, expired, canceled),
     [buys, sells, expired, canceled],
@@ -24,16 +30,17 @@ export function DailyPnLChart({ buys, sells, expired, canceled, itemName }: Prop
 
   if (series.length === 0) {
     return (
-      <p className="rounded-lg border border-[#333] bg-[#252525] p-6 text-sm text-[#999]">
+      <p className="rounded-lg border border-border bg-surface p-6 text-sm text-text-secondary">
         No P&L activity for {itemName} in this range.
       </p>
     );
   }
 
+  applyChartDefaults();
+  const c = getChartColors();
+
   const labels = series.map((d) => d.dayLabel);
-  const barColors = series.map((d) =>
-    d.netGold >= 0 ? COLORS.profit : COLORS.loss,
-  );
+  const barColors = series.map((d) => (d.netGold >= 0 ? c.profit : c.loss));
 
   const chartData = {
     labels,
@@ -50,7 +57,7 @@ export function DailyPnLChart({ buys, sells, expired, canceled, itemName }: Prop
         type: "line" as const,
         label: "Cumulative",
         data: series.map((d) => d.cumulativeNetGold),
-        borderColor: "#e0e0e0",
+        borderColor: c.text,
         backgroundColor: "rgba(224, 224, 224, 0.08)",
         tension: 0.2,
         pointRadius: 0,
@@ -63,21 +70,21 @@ export function DailyPnLChart({ buys, sells, expired, canceled, itemName }: Prop
     responsive: true,
     maintainAspectRatio: false,
     scales: {
-      x: { ticks: { color: COLORS.text }, grid: { color: "#2a2a2a" } },
+      x: { ticks: { color: c.text }, grid: { color: c.grid } },
       y: {
-        title: { display: true, text: "Daily net (gold)", color: COLORS.text },
-        ticks: { color: COLORS.text },
-        grid: { color: "#2a2a2a" },
+        title: { display: true, text: "Daily net (gold)", color: c.text },
+        ticks: { color: c.text },
+        grid: { color: c.grid },
       },
       y1: {
         position: "right" as const,
-        title: { display: true, text: "Cumulative (gold)", color: COLORS.text },
-        ticks: { color: COLORS.text },
+        title: { display: true, text: "Cumulative (gold)", color: c.text },
+        ticks: { color: c.text },
         grid: { drawOnChartArea: false },
       },
     },
     plugins: {
-      legend: { labels: { color: "#e0e0e0" } },
+      legend: { labels: { color: c.text } },
       tooltip: {
         callbacks: {
           afterBody: (items: { dataIndex: number }[]) => {
@@ -96,15 +103,15 @@ export function DailyPnLChart({ buys, sells, expired, canceled, itemName }: Prop
   };
 
   return (
-    <div className="rounded-lg border border-[#333] bg-[#252525] p-4">
+    <div className="rounded-lg border border-border bg-surface p-4">
       <header className="mb-2 flex items-baseline justify-between">
-        <h3 className="text-sm font-medium text-[#e0e0e0]">Daily P&amp;L</h3>
-        <p className="text-xs text-[#666]">
+        <h3 className="text-sm font-medium text-text-primary">Daily P&amp;L</h3>
+        <p className="text-xs text-text-muted">
           {series.length} day{series.length === 1 ? "" : "s"} of activity
         </p>
       </header>
       <div className="h-[clamp(360px,50vh,640px)]">
-        <Chart type="bar" data={chartData} options={options} />
+        <Chart key={theme} type="bar" data={chartData} options={options} />
       </div>
     </div>
   );
