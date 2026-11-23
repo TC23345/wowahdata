@@ -1,0 +1,250 @@
+{
+  "target_keyword": "SEO for Dentists",
+  "generated_on": "2026-05-08",
+  "assumed_market": "United States",
+  "keyword_type": {
+    "primary_type": "commercial investigation",
+    "secondary_types": ["informational", "local service", "vendor evaluation"],
+    "rationale": "The query can be searched by dentists or practice managers who want to understand dental SEO, compare service providers, or decide whether to hire a dental SEO company. SERP patterns are service-heavy but also reward practical guides."
+  },
+  "audience": [
+    "solo dental practice owners",
+    "multi-location dental groups",
+    "practice managers",
+    "dental marketing managers",
+    "general dentists and specialists evaluating SEO vendors"
+  ],
+  "priority_queries": [
+    "seo for dentists",
+    "dental seo",
+    "dentist seo",
+    "local seo for dentists",
+    "dental seo services",
+    "seo company for dentists",
+    "dental seo agency",
+    "dentist website seo",
+    "google business profile dentist",
+    "google maps seo for dentists",
+    "dental seo cost",
+    "how to do seo for dental practice",
+    "dental practice seo",
+    "dental keywords for seo",
+    "emergency dentist seo",
+    "dental implant seo"
+  ],
+  "expanded_queries": [
+    {
+      "query": "what is seo for dentists",
+      "intent_bucket": "fundamentals",
+      "priority": "high",
+      "rationale": "Captures beginners who need a plain-language definition before tactics."
+    },
+    {
+      "query": "dental seo",
+      "intent_bucket": "fundamentals",
+      "priority": "high",
+      "rationale": "Core synonym and likely semantic parent phrase."
+    },
+    {
+      "query": "dentist seo",
+      "intent_bucket": "fundamentals",
+      "priority": "high",
+      "rationale": "Short commercial variant used by service providers and buyers."
+    },
+    {
+      "query": "dental practice seo",
+      "intent_bucket": "fundamentals",
+      "priority": "high",
+      "rationale": "Practice-owner phrasing with commercial and implementation intent."
+    },
+    {
+      "query": "local seo for dentists",
+      "intent_bucket": "local_maps",
+      "priority": "high",
+      "rationale": "Central to dental SEO because patient acquisition is usually city, neighborhood, and map-pack driven."
+    },
+    {
+      "query": "google maps seo for dentists",
+      "intent_bucket": "local_maps",
+      "priority": "high",
+      "rationale": "Maps visibility is a direct concern for high-intent patient searches."
+    },
+    {
+      "query": "google business profile for dentists",
+      "intent_bucket": "local_maps",
+      "priority": "high",
+      "rationale": "Targets optimization of categories, services, hours, photos, reviews, and profile accuracy."
+    },
+    {
+      "query": "dentist near me seo",
+      "intent_bucket": "local_maps",
+      "priority": "medium",
+      "rationale": "Reflects how practices describe local patient acquisition, even though patients usually search 'dentist near me'."
+    },
+    {
+      "query": "dental citations",
+      "intent_bucket": "local_maps",
+      "priority": "medium",
+      "rationale": "Supports NAP consistency, local prominence, and directory cleanup."
+    },
+    {
+      "query": "dentist website seo",
+      "intent_bucket": "website_on_page",
+      "priority": "high",
+      "rationale": "Needs homepage, service-page, title tag, internal-link, and conversion guidance."
+    },
+    {
+      "query": "dental keywords for seo",
+      "intent_bucket": "website_on_page",
+      "priority": "high",
+      "rationale": "Searchers want keyword examples and a framework for choosing patient-intent terms."
+    },
+    {
+      "query": "dental seo content strategy",
+      "intent_bucket": "content_authority",
+      "priority": "medium",
+      "rationale": "Maps to service pages, condition content, treatment explainers, and FAQ content."
+    },
+    {
+      "query": "seo blog topics for dentists",
+      "intent_bucket": "content_authority",
+      "priority": "medium",
+      "rationale": "Likely follow-up query for practices building topical relevance."
+    },
+    {
+      "query": "dental service page seo",
+      "intent_bucket": "service_pages",
+      "priority": "high",
+      "rationale": "Dental SEO often depends on individual pages for implants, emergency care, Invisalign, veneers, cleanings, and other revenue drivers."
+    },
+    {
+      "query": "emergency dentist seo",
+      "intent_bucket": "service_pages",
+      "priority": "medium",
+      "rationale": "High-urgency intent that needs local, availability, and call-conversion guidance."
+    },
+    {
+      "query": "dental implant seo",
+      "intent_bucket": "service_pages",
+      "priority": "medium",
+      "rationale": "High-value procedure keyword that needs distinct content and trust signals."
+    },
+    {
+      "query": "cosmetic dentist seo",
+      "intent_bucket": "service_pages",
+      "priority": "medium",
+      "rationale": "Important specialty/service variant with commercial intent."
+    },
+    {
+      "query": "technical seo for dentist websites",
+      "intent_bucket": "technical_seo",
+      "priority": "medium",
+      "rationale": "Covers crawlability, indexation, Core Web Vitals, schema, duplicate pages, and mobile UX."
+    },
+    {
+      "query": "dental website schema",
+      "intent_bucket": "technical_seo",
+      "priority": "medium",
+      "rationale": "Supports structured data questions, especially Dentist/LocalBusiness schema."
+    },
+    {
+      "query": "google reviews for dentists seo",
+      "intent_bucket": "reviews_reputation",
+      "priority": "high",
+      "rationale": "Reviews influence local trust, conversion, and Google's prominence signals."
+    },
+    {
+      "query": "how to get more google reviews for dental practice",
+      "intent_bucket": "reviews_reputation",
+      "priority": "medium",
+      "rationale": "Common practical follow-up that needs compliant request workflows and response guidance."
+    },
+    {
+      "query": "dental seo metrics",
+      "intent_bucket": "measurement_roi",
+      "priority": "medium",
+      "rationale": "Searchers need to connect rankings and traffic to calls, appointment requests, and new patients."
+    },
+    {
+      "query": "how long does dental seo take",
+      "intent_bucket": "measurement_roi",
+      "priority": "high",
+      "rationale": "Expectation-setting question; should cite Google guidance that results can take months."
+    },
+    {
+      "query": "dental seo cost",
+      "intent_bucket": "vendor_evaluation",
+      "priority": "high",
+      "rationale": "Commercial evaluation query that should avoid false precision and explain pricing drivers."
+    },
+    {
+      "query": "dental seo services",
+      "intent_bucket": "vendor_evaluation",
+      "priority": "high",
+      "rationale": "Core buyer query for agency/service comparison."
+    },
+    {
+      "query": "best dental seo company",
+      "intent_bucket": "vendor_evaluation",
+      "priority": "medium",
+      "rationale": "Vendor-selection query; article should teach evaluation criteria rather than make unsupported rankings."
+    },
+    {
+      "query": "seo company for dentists",
+      "intent_bucket": "vendor_evaluation",
+      "priority": "high",
+      "rationale": "Strong commercial-intent variant that should be supported by a hiring/evaluation section."
+    },
+    {
+      "query": "does google ads help dental seo",
+      "intent_bucket": "vendor_evaluation",
+      "priority": "medium",
+      "rationale": "Needs a clear correction: Google Ads can drive paid visibility but does not improve organic ranking."
+    },
+    {
+      "query": "ai seo for dentists",
+      "intent_bucket": "emerging_ai_search",
+      "priority": "medium",
+      "rationale": "Emerging query about visibility in AI results; should be framed around structured, accurate, source-backed content rather than hype."
+    },
+    {
+      "query": "dental eeat seo",
+      "intent_bucket": "medical_trust",
+      "priority": "medium",
+      "rationale": "Dental content can affect health decisions, so writer should address expertise, authorship, review, and sourcing."
+    }
+  ],
+  "unassigned_or_low_fit_queries": [
+    {
+      "query": "dental seo jobs",
+      "reason": "Employment intent, not aligned with practice-owner article."
+    },
+    {
+      "query": "seo dental lab",
+      "reason": "Adjacent B2B dental-lab market; not a dentist practice article unless expanded later."
+    },
+    {
+      "query": "dental hygienist seo",
+      "reason": "Unclear or low-fit phrase; may refer to recruiting rather than practice growth."
+    }
+  ],
+  "research_backed_contextual_notes": [
+    "Google Business Profile local rankings are framed by relevance, distance, and prominence, so the article should prioritize complete profile data, accurate location/service information, reviews, and local authority.",
+    "Google states that SEO helps search engines understand content and helps users decide whether to visit through search results; avoid implying SEO is a shortcut or guaranteed ranking lever.",
+    "Google says SEO results can take from months to a year, so the article should set expectations around staged progress rather than instant patient volume.",
+    "Dental content intersects with health-related decision-making, so the article should emphasize E-E-A-T, named clinical reviewers where appropriate, accurate sources, and no unsupported treatment claims.",
+    "Dental SEO should connect visibility to real business outcomes: calls, booking requests, direction requests, form submissions, appointment quality, and new-patient revenue."
+  ],
+  "primary_sources_to_use": [
+    "https://support.google.com/business/answer/7091",
+    "https://developers.google.com/search/docs/fundamentals/seo-starter-guide",
+    "https://developers.google.com/search/docs/fundamentals/creating-helpful-content",
+    "https://developers.google.com/search/docs/fundamentals/do-i-need-seo",
+    "https://developers.google.com/search/docs/appearance/core-web-vitals",
+    "https://developers.google.com/search/docs/appearance/structured-data/local-business",
+    "https://schema.org/Dentist",
+    "https://www.ada.org/resources/research/health-policy-institute/dentist-workforce",
+    "https://www.bls.gov/ooh/healthcare/dentists.htm",
+    "https://www.brightlocal.com/research/local-consumer-review-survey/"
+  ]
+}
