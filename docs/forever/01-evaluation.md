@@ -95,7 +95,10 @@ dust, essences, shards, bolts and bags come out (disenchanting and tailoring).
   sell days, not good days and bad days.
 - The "DE source" card (`sold + expired − bought`) is the tool's one
   acknowledgement of this: 34,325 implied units for Arcane Dust. It is the right
-  instinct expressed as a single number with no input side attached.
+  instinct expressed as a single number with no input side attached. The formula
+  also overstates: 34,325 is more than the 27,612 units actually sold, because
+  expired stock that was relisted is counted each time it expired. Sold minus
+  bought gives 22,345 (81% of units sold).
 
 This is the largest gap between what the trader does and what the tool shows.
 
