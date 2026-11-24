@@ -17,7 +17,15 @@ This is a design, not an implementation. No application code has changed.
 A clickable mockup of the shell, the three workspaces and the block states, filled
 with the sample export's real figures, is on the design canvas:
 <https://claude.ai/artifact/CKnctiwRHiToi7ZRzBx9iN> (private to the owner unless
-shared).
+shared). It was drawn before the review below: it shows the wide layout only, and
+the price timeline and item ledger at the `L` size rather than the `XL` the design
+now specifies.
+
+The three design sections were written in parallel by separate designers,
+reconciled, then checked by an independent reviewer who had not seen the work.
+The review found three blocking problems — shell bars that did not fit below about
+1,500px, a first-run state that changed the grid, and an import rule that could
+drop rows — and all three are fixed in the documents as they stand.
 
 ## What the current tool gets right
 
@@ -27,14 +35,30 @@ Measured on the bundled Nightslayer sample (20,902 rows, 21 Jan – 6 May 2026):
   six hours of the day hold 49–56% of units for the three largest items; the worst
   six hold 7–11%. Weekday patterns differ by item.
 - **Price against time beats price distribution.** Flip spreads are 4–7%;
-  week-to-week drift is 21–101%. The scatter shows that; the histogram hides it.
+  week-to-week drift is 29–115%. The scatter shows that; the histogram hides it.
 - **The "DE source" card points at the real business.** 1,095 items were bought
   and 168 sold: this is a conversion pipeline (gear and cloth in; dust, essences,
   shards, bolts and bags out), and per-item P&L misreads it in both directions.
 
-And where it misleads: the heatmap's per-cell price (a 12.7% gap that is −0.7%
+And where it misleads: the heatmap's per-cell price (a 12.7% gap that is about 1%
 after normalising by week), row-based sell-through (96% by rows, 64% by units once
 cancels count), and a cash-flow tab for 40g of fees against 103,339g of revenue.
+
+## Defects found in the current app along the way
+
+Each was confirmed against the code by the reviewer; none is fixed here.
+
+- **Uploading a subset of files wipes the rest.** "Upload more files" with only a
+  new sales file replaces the stored realm with one that has empty purchases,
+  expired, canceled, income and expenses (`lib/parse.ts:88-101` with
+  `components/Dashboard.tsx:75-79`). The README promises "drop any subset".
+- **Parsing runs on the main thread.** `lib/parse-worker.ts` exists but nothing
+  imports it.
+- **Cash-flow week keys shift a day east of UTC** (`lib/cashflow.ts:18-21`).
+- **Unparseable numbers become zero silently** (`lib/parse.ts:10-17`), so a changed
+  export format would load as rows of zeros.
+- **Revenue and P&L include vendor, trade and COD rows** (`lib/transform.ts` has no
+  source filter).
 
 ## What Forever changes
 
@@ -58,19 +82,20 @@ exactly; the Forever profile marks every unverified value as a per-dataset setti
 
 **Data is queried, not filtered.** A Web Worker owns the dataset. Events are
 stored as month-partitioned typed-array chunks in IndexedDB and pre-aggregated
-into cubes keyed on the UTC hour, so a block query costs cells, not rows, and
-timezone or week-start changes need no rebuild. Imports merge instead of replace.
-The design point is one million events per dataset.
+into cubes keyed on the UTC hour — including a fine price cube for the price
+timeline — so a block query costs cells, not rows, and a timezone change needs no
+rebuild. Imports merge instead of replace, tracking which intervals each export
+actually covered. The design point is one million events per dataset.
 
 **Geometry depends on two things only: the workspace and the breakpoint.** A
-shell of fixed-height bars, a 12-column grid with an 88px row unit, and five block
-sizes (`kpi`, `S`, `M`, `L`, `XL`). Every block state — loading, ready, stale,
+shell of fixed-height bars with stated contents per breakpoint, a 12-column grid
+with an 88px row unit, and five block sizes (`kpi`, `S`, `M`, `L`, `XL`). Every block state — loading, ready, stale,
 empty, error, unavailable — paints the same box. Anything that appears on demand
 is an overlay or occupies a slot that was already reserved. CSS containment makes
 a violation show up as clipped content in one block instead of a page shift.
 
 **Three workspaces replace six tabs.** *Item* (timing heatmap, price timeline,
-listing windows, weekly spread, listing outcomes), *Pipeline* (inputs and outputs,
+listing windows, buy/sell spread, listing outcomes), *Pipeline* (inputs and outputs,
 spend against revenue, outcomes by item) and *Portfolio* (item ledger,
 concentration, house split, fees). Adding a block is a registry entry and one line
 in a workspace definition.
@@ -91,6 +116,10 @@ matrix.
 | Unconfirmed price basis | Treat as net, show figures as recorded, flag it once on the dataset | A 15% uncertainty band on every number would swamp the 4–7% spreads the tool exists to show |
 | Pipeline margin | Sold − bought over every member item on both sides | Pipelines plus unassigned then always equal the portfolio |
 | Profit colour | Only on flip margin (matched units) | Pipeline and portfolio totals omit unsold stock, so a negative is not necessarily a loss |
+| Reset week | Anchored to a UTC instant per dataset, not to midnight in the display zone | Changing the display zone must not move week buckets or baselines |
+| Auction house of a sale | Faction house is labelled "assumed" unless the trader confirms it | Any character can use the neutral house and no row reveals it |
+| No data loaded | The normal grid with every block unavailable; onboarding is a dialog | Loading or clearing data must not change the block list |
+| Price timeline and item ledger | `XL`, not `L` | An `L` body is 244px: too short for binned marks, and seven table rows of 1,224 |
 
 ## Decisions that are yours
 
