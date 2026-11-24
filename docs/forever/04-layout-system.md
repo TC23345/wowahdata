@@ -100,7 +100,7 @@ Contents and heights per arrangement (widths in px, gaps 12 unless noted):
 | B context bar | **48** — combobox 260 · quick row · range 280 · `Custom ▾` 92 · dates 184 (only when W ≥ 1272) | **88**, two fixed lines — combobox, full width / range 280 · `Custom ▾` 92 | **48** — combobox (flex, min 200) · `Range ▾` 112 |
 | C workspace nav | **40** — tabs in an `OverflowRow` with `More ▾` | **40** — same | **40** — same |
 | Sticky cost (B + C) | 88 | 128 | 88 |
-| D KPI strip | **88** — six slots in one row | **188** — two rows of three | **264** — three rows of two |
+| D KPI strip (always six slots; unused ones blank) | **88** — one row | **188** — two rows of three | **264** — three rows of two |
 | F footer | **32** | **32** | **52**, two lines |
 
 - **Bar A sheds by arrangement, not by measurement.** Below wide, the edition
@@ -118,8 +118,6 @@ Contents and heights per arrangement (widths in px, gaps 12 unless noted):
   load time (today under the panel at `Dashboard.tsx:291-297`, where it travels
   152px between tabs), and every dataset-level caveat — price basis unconfirmed,
   row-semantics warning, attribution coverage.
-- **KPI strip** always has six slots; a workspace supplies up to six KPIs and
-  the rest render blank.
 - **Footer** holds the privacy line, the version and, when market context is
   on, the TSM attribution. The attribution slot is always reserved. The footer
   moves when workspaces differ in length, which is acceptable because it is
@@ -139,12 +137,7 @@ Bar B's fixed part at wide is combobox 260 + range 280 + Custom 92 with gaps of
 12, 16 and 8 = 668, or 860 with the 184px date label and its 8px gap. `n` quick
 slots take `140n − 8`.
 
-### Context bar in detail (wide)
-
-```
-[ Greater Planar Essence ···· ▾ ] [quick][quick][quick] │ [This week][7d][30d][90d][All] [Custom ▾]  21 Jan 26 – 6 May 26
-   260 combobox                     132 each, 8 apart      280 segmented                  92          184, W ≥ 1272 only
-```
+### Context bar in detail
 
 - **Subject combobox.** Always shows the current item, truncated with the full
   name in `title`; typing in it searches. Its overlay list has the sections
@@ -155,9 +148,9 @@ slots take `140n − 8`.
   text inside a fixed box. On the Pipeline workspace the same slot is the
   pipeline combobox; on Portfolio it reads "All items" and is disabled, not
   removed.
-- **Quick row (wide only).** Up to five 132px slots — pinned items first, then
-  top-by-revenue — in an `OverflowRow`, which drops slots from the end when
-  they do not fit. How many fit is a function of W alone:
+- **Quick row (wide only).** Up to five 132px slots, 8px apart — pinned items
+  first, then top-by-revenue — in an `OverflowRow`, which drops slots from the
+  end when they do not fit. How many fit is a function of W alone:
 
   | W | Date label | Quick slots |
   | --- | --- | ---: |
@@ -374,7 +367,8 @@ choice follows from law 1: the only input that changes geometry is in the path,
 so the server-rendered HTML for a deep link already contains the right boxes,
 and the Suspense fallback required by `useSearchParams` (today a bare
 `<p>Loading…</p>` at `app/page.tsx:28`) is that same grid. Because a page with
-no dataset is also that grid (§3), the static HTML is never replaced. Existing `?tab=` links redirect to the matching workspace.
+no dataset is also that grid (§3), the static HTML is never replaced. Existing
+`?tab=` links redirect to the matching workspace.
 
 ## 5. Grid
 
@@ -384,7 +378,7 @@ width W is the only input and bars and blocks re-arrange together.
 ```css
 html { scrollbar-gutter: stable; scroll-padding-top: var(--sticky-h); }
 
-.shell   { container: shell / inline-size; max-width: 1600px; margin-inline: auto; padding-inline: 16px; }
+.shell   { container: shell / inline-size; max-width: 1632px; margin-inline: auto; padding-inline: 16px; }  /* W ≤ 1600 */
 .canvas  { min-height: calc(100vh - var(--sticky-h)); }   /* --sticky-h: 88px, 128px at medium */
 
 .ws-grid {
@@ -436,7 +430,7 @@ Resulting block sizes (height is `rows × unit + (rows − 1) × 12`):
   a threshold the grid re-flows once. Both are window resizes, not interactions.
 - **`S` is a third of a row only at wide.** At medium it spans all six columns,
   because three-up `S` blocks would otherwise leave half a row empty.
-- **At 1600px and above the canvas stops growing** (the existing cap,
+- **At W = 1600 the canvas stops growing** (today's cap is `max-w-[1600px]` at
   `app/page.tsx:12`). No 16- or 24-column mode: it would be a fourth
   arrangement to validate for every workspace, and a 12-column `S` is already
   525px at the cap.

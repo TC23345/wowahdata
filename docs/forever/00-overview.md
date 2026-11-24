@@ -17,9 +17,11 @@ This is a design, not an implementation. No application code has changed.
 A clickable mockup of the shell, the three workspaces and the block states, filled
 with the sample export's real figures, is on the design canvas:
 <https://claude.ai/artifact/CKnctiwRHiToi7ZRzBx9iN> (private to the owner unless
-shared). It was drawn before the review below: it shows the wide layout only, and
-the price timeline and item ledger at the `L` size rather than the `XL` the design
-now specifies.
+shared). It was drawn before the review below, so it differs from the documents in
+three ways: it shows the wide layout only, it draws the price timeline and item
+ledger at the `L` size rather than `XL`, and it shows four quick slots where the
+specification fits three in a 1440px window. Where they differ, the documents are
+authoritative.
 
 The three design sections were written in parallel by separate designers,
 reconciled, then checked by an independent reviewer who had not seen the work.
