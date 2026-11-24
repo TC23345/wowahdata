@@ -63,7 +63,8 @@ data files, and community API clients. Every row carries a confidence tag:
 | The client's `GetRealmName()` returned internal shard names until ~2026-11-20 and returns an empty string since. | Confirmed |
 | CSV columns in a Forever export. | Unknown |
 | Whether the recorded sale price is net of the cut, and of which cut. | Unknown |
-| Row semantics for commodity sales (one sale mail can cover "Multiple Buyers"). | Unknown |
+| One sale mail can cover "Multiple Buyers" (client string). | Confirmed |
+| How TSM records such a sale: row count, `stackSize`, `quantity`, `otherPlayer`. | Unknown |
 
 ## Public market data
 
@@ -72,7 +73,7 @@ data files, and community API clients. Every row carries a confidence tag:
 | Blizzard API namespaces `static-forever-{region}`, `dynamic-forever-{region}`; rulesets replace realms (`/data/wow/ruleset/{id}/auctions/{houseId}` and `…/commodities`). Undocumented by Blizzard. | Confirmed (community clients) |
 | Snapshots publish roughly hourly; up to ~60k listings (5–9 MB) per house; asking prices only. | Single-source |
 | Which API house IDs belong to which ruleset. | Unknown |
-| TSM public data: region and ruleset-faction CSVs (`marketValue`, `historical`, `avgSalePrice`, `saleRate`, `soldPerDay`). Attribution required; no bulk republishing. | Confirmed |
+| TSM public data: `forever/{region}/region/items.csv` (`marketValue`, `historical`, `avgSalePrice`, `saleRate`, `soldPerDay`; updated daily) and `forever/{region}/realm/{ruleset}-{faction}/items.csv` (`marketValue`, `minBuyout`, `recent`, `historical`; updated every few hours). Attribution required; no bulk republishing. | Confirmed |
 
 ## Scale
 
@@ -81,6 +82,7 @@ data files, and community API clients. Every row carries a confidence tag:
 | 15.16M characters created by 2026-11-17 (characters, not players). | Confirmed (secondary reports) |
 | One snapshot showed 3.35M listings across 36 houses; the largest EU houses hold 370–405k each, US 212–253k. RP houses are 5–10× smaller. | Single-source |
 | Prices deflated steeply in week one (median tracked material −41% in five days). | Single-source |
+| Launch-era unit prices are small and differ by faction (Mageweave reported at 8s on Alliance and 18s on Horde, US PvP, 7 Nov). | Single-source |
 | No gold or character transfers from Classic; no WoW Token. | Single-source |
 
 ## What this means for the tool

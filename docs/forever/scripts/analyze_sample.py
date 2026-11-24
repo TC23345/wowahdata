@@ -72,7 +72,7 @@ for n,d in sorted(items.items(), key=lambda kv:-kv[1]["sg"]):
         # price volatility over time: weekly avg sell
         wk=collections.defaultdict(lambda:[0,0])
         for r in s:
-            k=(r["time"]-345600-86400*5)//604800; wk[k][0]+=g(r); wk[k][1]+=r["quantity"]
+            k=(r["time"]-86400*5)//604800; wk[k][0]+=g(r); wk[k][1]+=r["quantity"]
         wa=[v[0]/v[1] for k,v in sorted(wk.items())]
         print("%-26s mb=%7.2f ms=%7.2f spread=%+5.0f%% buys>=medsell=%3.0f%% weekly avg sell min/max=%.2f/%.2f (%d wks) pnl=%8.0f"%(n[:26],mb,ms,100*(ms/mb-1),100*above,min(wa),max(wa),len(wa),d["sg"]-d["bg"]))
 # sell-through
