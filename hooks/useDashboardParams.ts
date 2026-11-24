@@ -8,7 +8,9 @@ export type DashboardParams = {
   range: string | null; // 'all' | 'week:YYYY-MM-DD' | 'custom'
   start: string | null; // YYYY-MM-DD when range === 'custom'
   end: string | null;
-  tab: string | null; // 'heatmap' | 'scatter' | 'pnl' | 'histogram'
+  tab: string | null; // legacy one-chart-per-tab URLs; mapped onto workspaces
+  ws: string | null; // 'item' | 'pipeline' | 'portfolio'
+  tz: string | null; // 'local' | 'utc'
 };
 
 export function useDashboardParams() {
@@ -22,6 +24,8 @@ export function useDashboardParams() {
       start: searchParams.get("start"),
       end: searchParams.get("end"),
       tab: searchParams.get("tab"),
+      ws: searchParams.get("ws"),
+      tz: searchParams.get("tz"),
     }),
     [searchParams],
   );

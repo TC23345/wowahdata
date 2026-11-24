@@ -159,6 +159,42 @@ matrix.
 9. Item groups and pipelines; the new blocks.
 10. Market context, if chosen.
 
+### Status
+
+Steps 1–5 are implemented on the Classic dataset, plus the new blocks from step 9
+that need no pipeline configuration (the generated "All conversions" pipeline
+stands in for user-defined ones):
+
+- `scripts/geometry-check.cjs` (`npm run check:geometry`) asserts that no bar or
+  block moves by more than 0.5px across 129 interactions at 1440, 1100, 820 and
+  390px widths, and it catches a deliberately planted layout bug.
+- `lib/layout.ts`, `lib/workspaces.ts` and `app/globals.css` implement the size
+  tokens, arrangements and workspaces; `components/shell/` holds the block
+  shell, bars, popovers and workspace grid; `components/blocks/` holds the
+  twelve blocks and the KPI strip.
+- `components/ah/` rebuilds the useful patterns of the WoW: Forever auction
+  house interface as original React code: the results table (fixed and fill
+  columns, sortable headers, fixed rows, selection and hover), the coin money
+  display at copper precision, and the item search. No Blizzard code or art is
+  copied: the interface source mirror carries no licence, and this repository
+  is public under MIT.
+
+Not yet done, and still needed:
+
+- **Data work runs on the main thread.** Blocks compute from filtered rows. The
+  worker, cubes and `useBlockQuery` are step 7, and the dimmed "stale" state uses
+  React's deferred rendering in the meantime.
+- **Price marks are per trade, not binned.** The price timeline still draws one
+  bubble per trade, pending decision 1 above.
+- **Workspace is a query parameter, not a path segment.** It is `?ws=`, not
+  `/w/[workspace]`.
+- **The display zone applies only to timing.** It drives the heatmap, listing
+  windows and peak hours; the other time axes are still in browser-local days.
+- **Listing durations are hard-coded for TBC.** The listing-window block uses
+  12/24/48 hours for the Classic Anniversary realms (The Burning Crusade's
+  durations) and 2/8/24 for Forever, from `lib/edition.ts`, until the edition
+  profile replaces it.
+
 ## What to obtain before step 8
 
 One real Forever TSM Accounting export. It settles the filename token, the column

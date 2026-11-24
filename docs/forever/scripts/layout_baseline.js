@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports -- run with the preinstalled global Playwright */
 const { chromium } = require('playwright');
 (async () => {
   const b = await chromium.launch();

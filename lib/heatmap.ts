@@ -50,6 +50,12 @@ function dayHourFromDate(d: Date, tz: HeatmapTz): { dayIdx: number; hour: number
   return { dayIdx: tradingDayIndex(d), hour: d.getHours() };
 }
 
+/** Index into a Tue-first 7×24 week grid (day × 24 + hour) for a timestamp. */
+export function cellIndex(unixSec: number, tz: HeatmapTz): number {
+  const { dayIdx, hour } = dayHourFromDate(new Date(unixSec * 1000), tz);
+  return dayIdx * 24 + hour;
+}
+
 function median(values: number[]): number {
   if (values.length === 0) return 0;
   const sorted = [...values].sort((a, b) => a - b);

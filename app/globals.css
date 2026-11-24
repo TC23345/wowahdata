@@ -3,14 +3,21 @@
 :root {
   --background: #1a1a1a;
   --surface: #252525;
+  --surface-sunken: #1d1d1d;
   --border: #333;
   --text-primary: #e0e0e0;
   --text-secondary: #999;
   --text-muted: #666;
   --buy: rgb(29, 158, 117);
   --sell: rgb(83, 74, 183);
+  /* --sell is 2.2:1 on --surface: fine for tints, too dark for marks and lines. */
+  --sell-mark: #a9a2f2;
   --profit: #5dcaa5;
   --loss: #e24b4a;
+  --loss-text: #f07b7a;
+  --coin-gold: #ffd100;
+  --coin-silver: #c7c7cf;
+  --coin-copper: #eda55f;
 }
 
 @theme inline {
@@ -27,8 +34,147 @@
 
 body {
   font-family: system-ui, -apple-system, sans-serif;
+  font-variant-numeric: tabular-nums;
 }
 
 html {
   color-scheme: dark;
+  /* Workspaces differ in length; without this the page width jumps by a
+     scrollbar when switching between a short and a long one. */
+  scrollbar-gutter: stable;
+  /* Keep keyboard focus and in-page links out from under the sticky bars. */
+  scroll-padding-top: 88px;
 }
+
+/* ── Shell (docs/forever/04-layout-system.md §3) ──────────────────────────── */
+
+.shell {
+  container: shell / inline-size;
+  max-width: 1600px;
+  margin-inline: auto;
+  padding-inline: 16px;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.bar-a { height: 44px; border-bottom: 1px solid var(--border); }
+.bar-b { height: 48px; gap: 8px; }
+.bar-b-line2 { display: none; }
+.bar-c { height: 40px; gap: 4px; align-items: stretch; border-bottom: 1px solid var(--border); }
+.sticky-bars { position: sticky; top: 0; z-index: 20; background: var(--background); }
+
+.only-narrow, .below-wide { display: none !important; }
+@container shell (width < 1272px) { .hide-below-1272 { display: none !important; } }
+@container shell (width < 960px) {
+  .only-wide { display: none !important; }
+  .below-wide { display: flex !important; }
+  .bar-b { height: 88px; flex-direction: column; align-items: stretch; justify-content: center; gap: 8px; }
+  .bar-b-line1, .bar-b-line2 { display: flex; align-items: center; gap: 8px; height: 32px; }
+  .ws-canvas { min-height: calc(100vh - 128px); }
+}
+@container shell (width < 600px) {
+  .not-narrow { display: none !important; }
+  .only-narrow { display: flex !important; }
+  .bar-b { height: 48px; flex-direction: row; align-items: center; }
+  .bar-b-line2 { display: none; }
+  .ws-canvas { min-height: calc(100vh - 88px); }
+}
+
+/* ── Workspace grid (§5) ─────────────────────────────────────────────────── */
+
+.ws-canvas {
+  container: canvas / inline-size;
+  padding-block: 16px;
+  /* Always taller than the viewport, so switching to a short workspace can
+     never pull the static bar back under the sticky ones. */
+  min-height: calc(100vh - 88px);
+}
+
+.ws-grid {
+  display: grid;
+  gap: 12px;
+  grid-auto-flow: row;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-auto-rows: 88px;
+}
+.ws-grid > [data-size="kpi"] { grid-column: span 2; grid-row: span 1; }
+.ws-grid > [data-size="S"] { grid-column: span 4; grid-row: span 4; }
+.ws-grid > [data-size="M"] { grid-column: span 6; grid-row: span 4; }
+.ws-grid > [data-size="L"] { grid-column: span 12; grid-row: span 4; }
+.ws-grid > [data-size="XL"] { grid-column: span 12; grid-row: span 6; }
+
+@container canvas (width < 960px) {
+  .ws-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .ws-grid > [data-size="S"],
+  .ws-grid > [data-size="M"],
+  .ws-grid > [data-size="L"],
+  .ws-grid > [data-size="XL"] { grid-column: span 6; }
+}
+@container canvas (width < 600px) {
+  .ws-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 80px; }
+  .ws-grid > [data-size="kpi"] { grid-column: span 1; }
+  .ws-grid > [data-size="S"],
+  .ws-grid > [data-size="M"],
+  .ws-grid > [data-size="L"] { grid-column: span 2; }
+  .ws-grid > [data-size="XL"] { grid-column: span 2; grid-row: span 5; }
+}
+
+/* ── Block shell (§4) ────────────────────────────────────────────────────── */
+
+/* Containment is what turns a layout bug into clipped content inside one
+   block instead of a page shift: nothing inside can change the block's size. */
+.block {
+  contain: strict;
+  container-type: size;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  min-width: 0;
+}
+.block-header { height: 40px; flex: none; display: flex; align-items: center; gap: 10px; padding: 0 14px; border-bottom: 1px solid #2e2e2e; white-space: nowrap; overflow: hidden; }
+.block-toolbar { height: 36px; flex: none; display: flex; align-items: center; gap: 8px; padding: 0 14px; white-space: nowrap; overflow: hidden; }
+.block-body { flex: 1; min-height: 0; position: relative; overflow: hidden; }
+.block-readout { height: 44px; flex: none; display: flex; align-items: center; padding: 0 14px; border-top: 1px solid #2e2e2e; overflow: hidden; white-space: nowrap; }
+.block-footer { height: 24px; flex: none; display: flex; align-items: center; gap: 8px; padding: 0 14px; font-size: 11px; color: var(--text-secondary); overflow: hidden; white-space: nowrap; }
+
+.kpi { padding: 12px 14px; justify-content: space-between; }
+
+/* Skeleton shimmer is opacity-only: it never changes a box. */
+@keyframes skeleton-pulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+.skeleton { background: #2f2f2f; border-radius: 3px; animation: skeleton-pulse 1.4s ease-in-out infinite; }
+
+/* Top-layer popovers: positioned from the trigger's rect by Popover.tsx. */
+[popover].popover-panel {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--background);
+  color: var(--text-primary);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.5);
+}
+
+dialog.data-dialog {
+  margin: auto;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--background);
+  color: var(--text-primary);
+  padding: 0;
+  width: min(720px, calc(100vw - 32px));
+  max-height: calc(100vh - 64px);
+}
+dialog.data-dialog::backdrop { background: rgb(0 0 0 / 0.6); }
+
+/* Expired: hatched, no fill — differs from sold and canceled by pattern, not hue alone. */
+.hatch { background: repeating-linear-gradient(45deg, #777 0, #777 2px, transparent 2px, transparent 5px); }
