@@ -178,3 +178,12 @@ dialog.data-dialog::backdrop { background: rgb(0 0 0 / 0.6); }
 
 /* Expired: hatched, no fill — differs from sold and canceled by pattern, not hue alone. */
 .hatch { background: repeating-linear-gradient(45deg, #777 0, #777 2px, transparent 2px, transparent 5px); }
+
+/* View switcher: segmented when the block is wide enough, a select when not.
+   Decided by the block's own width (it is a size container), never by data. */
+.view-select { display: none; }
+@container (width < 560px) {
+  .view-seg { display: none; }
+  .view-select { display: block; }
+}
+.toolbar-divider { width: 1px; height: 20px; flex: none; background: var(--border); }

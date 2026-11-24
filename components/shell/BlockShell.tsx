@@ -27,6 +27,8 @@ type Props = {
   stale?: boolean;
   /** Dataset-level caveat, shown as a dot in the header (text in its title). */
   caveat?: string;
+  /** Always enabled, even when the body has no data: the view switcher lives here. */
+  toolbarLead?: ReactNode;
   toolbar?: ReactNode;
   readout?: { fields: ReadoutField[] | null; idle: string };
   footer?: ReactNode;
@@ -44,7 +46,7 @@ const READOUT_COLUMN = 128;
  * Every status — loading, ready, stale, empty, error, unavailable — renders in
  * the same body rectangle.
  */
-export function BlockShell({ slot, title, chrome, status, summary, stale, caveat, toolbar, readout, footer, children }: Props) {
+export function BlockShell({ slot, title, chrome, status, summary, stale, caveat, toolbarLead, toolbar, readout, footer, children }: Props) {
   const live = status.kind === "ready";
   return (
     <section className="block" data-size={slot.size} data-block-id={slot.id} aria-label={title} aria-busy={stale || status.kind === "loading"}>
@@ -62,7 +64,8 @@ export function BlockShell({ slot, title, chrome, status, summary, stale, caveat
         </span>
       </header>
       {chrome.toolbar && (
-        <div className="block-toolbar" aria-disabled={!live}>
+        <div className="block-toolbar">
+          {toolbarLead}
           <fieldset disabled={!live} className={`flex min-w-0 items-center gap-2 ${live ? "" : "opacity-50"}`}>
             {toolbar}
           </fieldset>

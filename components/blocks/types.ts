@@ -1,7 +1,14 @@
-import type { BlockSlot } from "@/components/shell/BlockShell";
+import type { ReactNode } from "react";
+import type { BlockSlot, Chrome } from "@/components/shell/BlockShell";
 import type { BlockCtx } from "./context";
 
 export type BlockProps = { slot: BlockSlot; ctx: BlockCtx; stale: boolean };
+
+/** A view of a primary chart: draws into the chart's box, with the view switcher first in its toolbar. */
+export type ViewProps = BlockProps & { viewSwitch: ReactNode; title: string };
+
+/** Every primary chart has all four zones in every view, so switching views never changes the anatomy. */
+export const PRIMARY_CHROME: Chrome = { toolbar: true, readout: true, footer: true };
 
 export const DAYS_TUE_FIRST = ["Tue", "Wed", "Thu", "Fri", "Sat", "Sun", "Mon"] as const;
 

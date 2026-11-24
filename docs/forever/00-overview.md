@@ -161,6 +161,28 @@ matrix.
 
 ### Status
 
+**Revision, primary charts.** The twelve blocks of `05-block-catalog.md` are
+consolidated into seven primary charts, each with a view switcher. Breadth
+comes from views rather than more boxes, and a view change is a body swap
+inside a fixed box:
+
+| Chart | Views (absorbed blocks in brackets) |
+| --- | --- |
+| Timing | Heatmap (timing-heatmap) · Listing windows (post-windows) · Hour profile (new) |
+| Price | Trades (price-timeline) · Spread (spread) · Range (new) |
+| Listing outcomes | Over time (outcomes-trend) · By item (outcomes-by-item) |
+| Spend vs revenue | Cumulative and Per period (cumulative-flow) · Net (the old daily P&L, with a running total) |
+| Pipeline | Balance (pipeline-balance) · Roles (new) |
+| Items | Table (item-ledger) · Concentration (concentration) |
+| Costs | Fees (fees) · By auction house (house-split) |
+
+Every view of every chart has all four zones (toolbar, readout, footer), the
+view switcher sits in an always-enabled lead slot of the toolbar, and it
+collapses to a select when its block is narrower than 560px. A workspace
+placement can choose the default view, so Outcomes opens on *Over time* for an
+item and *By item* on Pipeline and Portfolio. The geometry check cycles every
+view at every width.
+
 Steps 1–5 are implemented on the Classic dataset, plus the new blocks from step 9
 that need no pipeline configuration (the generated "All conversions" pipeline
 stands in for user-defined ones):

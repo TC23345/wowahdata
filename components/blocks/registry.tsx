@@ -1,61 +1,102 @@
 "use client";
 
 import type { ComponentType } from "react";
-import type { Chrome } from "@/components/shell/BlockShell";
-import type { BlockId } from "@/lib/workspaces";
+import type { BlockId, ViewId } from "@/lib/workspaces";
 import {
-  HEATMAP_CHROME,
-  OUTCOMES_TREND_CHROME,
-  PRICE_CHROME,
-  PostWindowsBlock,
-  PriceTimelineBlock,
-  SPREAD_CHROME,
-  SpreadBlock,
-  TimingHeatmapBlock,
-  OutcomesTrendBlock,
-  WINDOWS_CHROME,
+  OutcomesItemView,
+  OutcomesTimeView,
+  PriceRangeView,
+  PriceSpreadView,
+  PriceTradesView,
+  TimingHeatmapView,
+  TimingHoursView,
+  TimingWindowsView,
 } from "./ItemBlocks";
 import {
-  CONCENTRATION_CHROME,
-  ConcentrationBlock,
-  CumulativeFlowBlock,
-  FEES_CHROME,
-  FLOW_CHROME,
-  FeesBlock,
-  HOUSE_CHROME,
-  HouseSplitBlock,
-  ItemLedgerBlock,
-  LEDGER_CHROME,
-  OUTCOMES_ITEM_CHROME,
-  OutcomesByItemBlock,
-  PIPELINE_CHROME,
-  PipelineBalanceBlock,
+  CostsFeesView,
+  CostsHousesView,
+  FlowBucketView,
+  FlowCumulativeView,
+  FlowNetView,
+  ItemsConcentrationView,
+  ItemsTableView,
+  PipelineBalanceView,
+  PipelineRolesView,
 } from "./PortfolioBlocks";
-import type { BlockProps } from "./types";
+import type { ViewProps } from "./types";
 
-export type BlockDefinition = {
+export type ViewDefinition = { value: ViewId; label: string; Component: ComponentType<ViewProps> };
+
+export type PrimaryChartDefinition = {
   title: string;
-  chrome: Chrome;
-  Component: ComponentType<BlockProps>;
+  /** The question the chart answers; views answer it from different angles. */
+  question: string;
+  views: ViewDefinition[];
 };
 
 /**
- * Adding a block is one entry here, one component, and one line in a
- * workspace definition (lib/workspaces.ts). Size is declared by the workspace;
- * title and chrome by the block, so the shell can paint the right box before
- * there is any data.
+ * The seven primary charts. A chart's size comes from where a workspace places
+ * it; its title, zones and views come from here. Adding breadth means adding a
+ * view to a chart, which costs no layout.
  */
-export const BLOCKS: Record<BlockId, BlockDefinition> = {
-  "timing-heatmap": { title: "When your sales cleared", chrome: HEATMAP_CHROME, Component: TimingHeatmapBlock },
-  "price-timeline": { title: "Price over time", chrome: PRICE_CHROME, Component: PriceTimelineBlock },
-  "post-windows": { title: "Best listing windows", chrome: WINDOWS_CHROME, Component: PostWindowsBlock },
-  spread: { title: "Buy vs sell spread", chrome: SPREAD_CHROME, Component: SpreadBlock },
-  "outcomes-trend": { title: "Listing outcomes", chrome: OUTCOMES_TREND_CHROME, Component: OutcomesTrendBlock },
-  "pipeline-balance": { title: "Inputs and outputs", chrome: PIPELINE_CHROME, Component: PipelineBalanceBlock },
-  "cumulative-flow": { title: "Spend vs revenue", chrome: FLOW_CHROME, Component: CumulativeFlowBlock },
-  "outcomes-by-item": { title: "Outcomes by item", chrome: OUTCOMES_ITEM_CHROME, Component: OutcomesByItemBlock },
-  "item-ledger": { title: "Items", chrome: LEDGER_CHROME, Component: ItemLedgerBlock },
-  concentration: { title: "Revenue concentration", chrome: CONCENTRATION_CHROME, Component: ConcentrationBlock },
-  "house-split": { title: "By auction house", chrome: HOUSE_CHROME, Component: HouseSplitBlock },
-  fees: { title: "Fees and upkeep", chrome: FEES_CHROME, Component: FeesBlock },
+export const BLOCKS: Record<BlockId, PrimaryChartDefinition> = {
+  timing: {
+    title: "Timing",
+    question: "When do this item's sales clear?",
+    views: [
+      { value: "heatmap", label: "Heatmap", Component: TimingHeatmapView },
+      { value: "windows", label: "Listing windows", Component: TimingWindowsView },
+      { value: "hours", label: "Hour profile", Component: TimingHoursView },
+    ],
+  },
+  price: {
+    title: "Price",
+    question: "What did I pay, what did I get, and how did both move?",
+    views: [
+      { value: "trades", label: "Trades", Component: PriceTradesView },
+      { value: "spread", label: "Spread", Component: PriceSpreadView },
+      { value: "range", label: "Range", Component: PriceRangeView },
+    ],
+  },
+  outcomes: {
+    title: "Listing outcomes",
+    question: "Of what I listed, how much sold, expired or got pulled?",
+    views: [
+      { value: "time", label: "Over time", Component: OutcomesTimeView },
+      { value: "by-item", label: "By item", Component: OutcomesItemView },
+    ],
+  },
+  flow: {
+    title: "Spend vs revenue",
+    question: "Is revenue keeping ahead of spend?",
+    views: [
+      { value: "cumulative", label: "Cumulative", Component: FlowCumulativeView },
+      { value: "bucket", label: "Per period", Component: FlowBucketView },
+      { value: "net", label: "Net", Component: FlowNetView },
+    ],
+  },
+  pipeline: {
+    title: "Pipeline",
+    question: "What goes in, what comes out, and what is left?",
+    views: [
+      { value: "balance", label: "Balance", Component: PipelineBalanceView },
+      { value: "roles", label: "Roles", Component: PipelineRolesView },
+    ],
+  },
+  items: {
+    title: "Items",
+    question: "Which items carry the business?",
+    views: [
+      { value: "table", label: "Table", Component: ItemsTableView },
+      { value: "concentration", label: "Concentration", Component: ItemsConcentrationView },
+    ],
+  },
+  costs: {
+    title: "Costs",
+    question: "What did trading cost besides the goods?",
+    views: [
+      { value: "fees", label: "Fees", Component: CostsFeesView },
+      { value: "houses", label: "By auction house", Component: CostsHousesView },
+    ],
+  },
 };

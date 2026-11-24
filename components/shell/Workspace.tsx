@@ -1,10 +1,12 @@
 "use client";
 
-import { Component, type ReactNode } from "react";
+import { Component, useState, type ReactNode } from "react";
 import { BLOCKS } from "@/components/blocks/registry";
 import { kpiValue, KPI_LABELS } from "@/components/blocks/kpis";
 import type { BlockCtx } from "@/components/blocks/context";
-import type { WorkspaceDefinition } from "@/lib/workspaces";
+import { PRIMARY_CHROME } from "@/components/blocks/types";
+import { ViewSwitch } from "@/components/blocks/ViewSwitch";
+import type { Placement, ViewId, WorkspaceDefinition } from "@/lib/workspaces";
 import { BlockShell, KpiCard, type BlockSlot } from "./BlockShell";
 
 type Props = {
@@ -17,7 +19,7 @@ type Props = {
 
 /**
  * One grid for every state. With no data the workspace still renders every
- * block in place — loading while booting, unavailable when empty — so loading
+ * chart in place — loading while booting, unavailable when empty — so loading
  * or clearing data never changes the block list or the document height.
  */
 export function Workspace({ workspace, ctx, mode, stale }: Props) {
@@ -31,33 +33,51 @@ export function Workspace({ workspace, ctx, mode, stale }: Props) {
         const v = kpiValue(id, ctx);
         return <KpiCard key={slotId} slotId={slotId} label={v.label} value={v.value} sub={v.sub} />;
       })}
-      {workspace.blocks.map((b) => {
-        const def = BLOCKS[b.id];
-        const slot: BlockSlot = { id: b.id, size: b.size };
+      {workspace.blocks.map((p) => {
+        const def = BLOCKS[p.id];
+        const slot: BlockSlot = { id: p.id, size: p.size };
         if (!ctx || mode !== "ready") {
           return (
             <BlockShell
-              key={b.id}
+              key={p.id}
               slot={slot}
               title={def.title}
-              chrome={def.chrome}
+              chrome={PRIMARY_CHROME}
               status={mode === "boot" ? { kind: "loading" } : { kind: "unavailable", message: "No data loaded. Drop your TSM Accounting export, or load the sample, from Manage data." }}
             />
           );
         }
-        return (
-          <BlockBoundary key={b.id} slot={slot} title={def.title} resetKey={`${ctx.item}|${ctx.range.start.getTime()}|${ctx.range.end.getTime()}`}>
-            <def.Component slot={slot} ctx={ctx} stale={stale} />
-          </BlockBoundary>
-        );
+        return <PrimaryChart key={`${workspace.id}:${p.id}`} placement={p} slot={slot} ctx={ctx} stale={stale} />;
       })}
     </div>
   );
 }
 
-/** A block that throws renders its error state in place; the rest keep working. */
+/**
+ * Holds a primary chart's current view. The view survives item, range and zone
+ * changes; it resets to the placement's default when the workspace changes.
+ */
+function PrimaryChart({ placement, slot, ctx, stale }: { placement: Placement; slot: BlockSlot; ctx: BlockCtx; stale: boolean }) {
+  const def = BLOCKS[placement.id];
+  const [view, setView] = useState<ViewId>(placement.view ?? def.views[0].value);
+  const current = def.views.find((v) => v.value === view) ?? def.views[0];
+  const viewSwitch = <ViewSwitch views={def.views} value={current.value} onChange={setView} title={def.title} />;
+  const View = current.Component;
+  return (
+    <BlockBoundary
+      slot={slot}
+      title={def.title}
+      viewSwitch={viewSwitch}
+      resetKey={`${current.value}|${ctx.item}|${ctx.range.start.getTime()}|${ctx.range.end.getTime()}`}
+    >
+      <View key={current.value} slot={slot} ctx={ctx} stale={stale} viewSwitch={viewSwitch} title={def.title} />
+    </BlockBoundary>
+  );
+}
+
+/** A view that throws renders its error state in place; the view switcher and every other chart keep working. */
 class BlockBoundary extends Component<
-  { slot: BlockSlot; title: string; resetKey: string; children: ReactNode },
+  { slot: BlockSlot; title: string; viewSwitch: ReactNode; resetKey: string; children: ReactNode },
   { failed: string | null; key: string }
 > {
   state = { failed: null as string | null, key: this.props.resetKey };
@@ -72,13 +92,13 @@ class BlockBoundary extends Component<
 
   render() {
     if (this.state.failed) {
-      const def = BLOCKS[this.props.slot.id as keyof typeof BLOCKS];
       return (
         <BlockShell
           slot={this.props.slot}
           title={this.props.title}
-          chrome={def.chrome}
-          status={{ kind: "error", message: `This block could not be computed: ${this.state.failed}` }}
+          chrome={PRIMARY_CHROME}
+          toolbarLead={this.props.viewSwitch}
+          status={{ kind: "error", message: `This view could not be computed: ${this.state.failed}` }}
         />
       );
     }

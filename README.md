@@ -6,11 +6,21 @@ A public, client-side dashboard for WoW auction-house traders. Drop your **Trade
 
 ## What you get
 
-Three workspaces, each a fixed arrangement of blocks. Switching item, range or time zone changes the data inside the blocks, never their size or position.
+Seven primary charts, each with a view switcher, arranged into three workspaces. Switching item, range, time zone or view changes what a chart shows, never its size or position.
 
-- **Item** — *when does this item move, and at what price?* The hero is a day-of-week × hour **sale heatmap** (Tue → Mon rows to match the WoW reset) with per-day and per-hour marginals and a *Consistency* mode that separates repeat demand from one-off sales. Below it: **price over time** (buys left, sells right, area ∝ units), **best listing windows** for each auction duration, the weekly **buy vs sell spread**, and **listing outcomes** (sold / canceled / expired, by units).
-- **Pipeline** — *does turning these inputs into those outputs make money?* A generated "All conversions" pipeline puts what you bought (gear, cloth) against what you sold (dust, essences, shards, bolts, bags), with spend vs revenue over time and outcomes by item.
-- **Portfolio** — *which items carry the business?* A sortable **item ledger** of everything you traded, revenue concentration, fees and upkeep (transfers to your own characters kept out of the total), and a by-auction-house block that fills in on Forever datasets.
+| Chart | Views |
+| --- | --- |
+| **Timing** | Heatmap (day × hour, Tue → Mon rows, with a *Consistency* mode) · Listing windows (the week as 168 hourly bars, best window per auction duration) · Hour profile (the average day; all days, weekdays or weekend) |
+| **Price** | Trades (buys left, sells right, area ∝ units) · Spread (median buy → median sell per period) · Range (middle half of prices per period) |
+| **Listing outcomes** | Over time · By item (sold / canceled / expired, by units) |
+| **Spend vs revenue** | Cumulative · Per period · Net (with running total) |
+| **Pipeline** | Balance (what went in against what came out) · Roles (inputs, outputs, flips) |
+| **Items** | Table (sortable ledger of everything you traded) · Concentration (how few items carry 80%) |
+| **Costs** | Fees (transfers to your own characters kept out) · By auction house (fills in on Forever datasets) |
+
+- **Item** — *when does this item move, and at what price?* Timing and Price, then Outcomes and Net flow for the item.
+- **Pipeline** — *does turning these inputs into those outputs make money?* Pipeline, then cumulative flow and outcomes by item for the member items.
+- **Portfolio** — *which items carry the business?* Items, then flow, costs and outcomes by item across everything.
 
 A six-card KPI strip heads each workspace. Revenue is never taxed twice: TSM sale prices are already net of the AH cut. Figures count auction rows only.
 

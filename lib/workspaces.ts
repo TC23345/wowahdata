@@ -9,19 +9,32 @@ import type { SizeToken } from "./layout";
 
 export type WorkspaceId = "item" | "pipeline" | "portfolio";
 
-export type BlockId =
-  | "timing-heatmap"
-  | "price-timeline"
-  | "post-windows"
+/**
+ * The seven primary charts. Each has a view switcher that changes what it
+ * shows inside the same box, so breadth comes from views, not from more boxes.
+ */
+export type BlockId = "timing" | "price" | "outcomes" | "flow" | "pipeline" | "items" | "costs";
+
+export type ViewId =
+  | "heatmap"
+  | "windows"
+  | "hours"
+  | "trades"
   | "spread"
-  | "outcomes-trend"
-  | "pipeline-balance"
-  | "cumulative-flow"
-  | "outcomes-by-item"
-  | "item-ledger"
+  | "range"
+  | "time"
+  | "by-item"
+  | "cumulative"
+  | "bucket"
+  | "net"
+  | "balance"
+  | "roles"
+  | "table"
   | "concentration"
-  | "house-split"
-  | "fees";
+  | "fees"
+  | "houses";
+
+export type Placement = { id: BlockId; size: SizeToken; view?: ViewId };
 
 export type KpiId =
   | "kpi-revenue"
@@ -46,7 +59,8 @@ export type WorkspaceDefinition = {
   /** What the subject combobox selects on this workspace. */
   subject: "item" | "pipeline" | "none";
   kpis: [KpiId, KpiId, KpiId, KpiId, KpiId, KpiId];
-  blocks: { id: BlockId; size: SizeToken }[];
+  /** Each placement can open on a different default view. */
+  blocks: Placement[];
 };
 
 export const WORKSPACES: WorkspaceDefinition[] = [
@@ -64,11 +78,10 @@ export const WORKSPACES: WorkspaceDefinition[] = [
       "kpi-peak-hours",
     ],
     blocks: [
-      { id: "timing-heatmap", size: "XL" },
-      { id: "price-timeline", size: "XL" },
-      { id: "post-windows", size: "S" },
-      { id: "spread", size: "S" },
-      { id: "outcomes-trend", size: "S" },
+      { id: "timing", size: "XL", view: "heatmap" },
+      { id: "price", size: "XL", view: "trades" },
+      { id: "outcomes", size: "M", view: "time" },
+      { id: "flow", size: "M", view: "net" },
     ],
   },
   {
@@ -85,9 +98,9 @@ export const WORKSPACES: WorkspaceDefinition[] = [
       "kpi-top-output",
     ],
     blocks: [
-      { id: "pipeline-balance", size: "L" },
-      { id: "cumulative-flow", size: "M" },
-      { id: "outcomes-by-item", size: "M" },
+      { id: "pipeline", size: "L", view: "balance" },
+      { id: "flow", size: "M", view: "cumulative" },
+      { id: "outcomes", size: "M", view: "by-item" },
     ],
   },
   {
@@ -104,12 +117,10 @@ export const WORKSPACES: WorkspaceDefinition[] = [
       "kpi-fees",
     ],
     blocks: [
-      { id: "item-ledger", size: "XL" },
-      { id: "cumulative-flow", size: "M" },
-      { id: "outcomes-by-item", size: "M" },
-      { id: "concentration", size: "S" },
-      { id: "house-split", size: "S" },
-      { id: "fees", size: "S" },
+      { id: "items", size: "XL", view: "table" },
+      { id: "flow", size: "M", view: "cumulative" },
+      { id: "costs", size: "M", view: "fees" },
+      { id: "outcomes", size: "L", view: "by-item" },
     ],
   },
 ];

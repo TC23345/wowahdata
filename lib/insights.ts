@@ -275,6 +275,64 @@ export function weightedMedianPrice(rows: { price: number; quantity: number }[])
   return sorted[sorted.length - 1].price;
 }
 
+/** Quantity-weighted quantile of unit prices, in copper. Null for no rows. */
+export function weightedQuantile(rows: { price: number; quantity: number }[], q: number): number | null {
+  if (rows.length === 0) return null;
+  const sorted = [...rows].sort((a, b) => a.price - b.price);
+  const total = sumUnits(sorted);
+  let acc = 0;
+  for (const r of sorted) {
+    acc += r.quantity;
+    if (acc >= total * q) return r.price;
+  }
+  return sorted[sorted.length - 1].price;
+}
+
+export type RangeBand = { p25: number; p50: number; p75: number; units: number } | null;
+
+/** Per bucket and side: the middle half of unit prices and the median, weighted by units. */
+export function priceRangeByBucket(set: TradeSet, axis: BucketAxis): { buy: RangeBand; sell: RangeBand }[] {
+  const buys = axis.starts.map(() => [] as PurchaseSaleRow[]);
+  const sells = axis.starts.map(() => [] as PurchaseSaleRow[]);
+  for (const r of set.purchases) {
+    if (!isAuction(r)) continue;
+    const i = axis.indexOf(r.time);
+    if (i >= 0) buys[i].push(r);
+  }
+  for (const r of set.sales) {
+    if (!isAuction(r)) continue;
+    const i = axis.indexOf(r.time);
+    if (i >= 0) sells[i].push(r);
+  }
+  const band = (rows: PurchaseSaleRow[]): RangeBand =>
+    rows.length === 0
+      ? null
+      : {
+          p25: weightedQuantile(rows, 0.25)!,
+          p50: weightedQuantile(rows, 0.5)!,
+          p75: weightedQuantile(rows, 0.75)!,
+          units: sumUnits(rows),
+        };
+  return axis.starts.map((_, i) => ({ buy: band(buys[i]), sell: band(sells[i]) }));
+}
+
+export type RoleSummary = { role: Role; items: number; spend: number; revenue: number; boughtUnits: number; soldUnits: number };
+
+export function roleSummary(ledger: LedgerRow[]): RoleSummary[] {
+  const roles: Role[] = ["input", "output", "flip"];
+  return roles.map((role) => {
+    const rows = ledger.filter((r) => r.role === role);
+    return {
+      role,
+      items: rows.length,
+      spend: rows.reduce((s, r) => s + r.spend, 0),
+      revenue: rows.reduce((s, r) => s + r.revenue, 0),
+      boughtUnits: rows.reduce((s, r) => s + r.boughtUnits, 0),
+      soldUnits: rows.reduce((s, r) => s + r.soldUnits, 0),
+    };
+  });
+}
+
 export type SpreadBucket = {
   buy: number | null;
   sell: number | null;

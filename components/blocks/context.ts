@@ -30,7 +30,7 @@ export type BlockCtx = {
   itemSet: ItemFilteredData;
   /** Every item, in range. */
   rangeSet: TradeSet & { income: CashFlowRow[]; expenses: CashFlowRow[] };
-  /** The workspace's scope in range: pipeline members on Pipeline, all items elsewhere. */
+  /** The workspace's scope in range: the active item on Item, pipeline members on Pipeline, all items on Portfolio. */
   scopeSet: TradeSet;
   ledger: LedgerRow[];
   scopeLedger: LedgerRow[];
@@ -74,8 +74,11 @@ export function buildBlockContext(args: {
   };
   const ledger = buildLedger(rangeSet, derived.roles);
   const member = (r: { itemName: string }) => (derived.roles.get(displayName(r)) ?? "flip") !== "flip";
+  const itemSet = filterForItem(data, item, range);
   const scopeSet: TradeSet =
-    workspace.id === "pipeline"
+    workspace.id === "item"
+      ? itemSet
+      : workspace.id === "pipeline"
       ? {
           purchases: rangeSet.purchases.filter(member),
           sales: rangeSet.sales.filter(member),
@@ -90,7 +93,7 @@ export function buildBlockContext(args: {
     range,
     axis: bucketAxis(range),
     tz,
-    itemSet: filterForItem(data, item, range),
+    itemSet,
     rangeSet,
     scopeSet,
     ledger,

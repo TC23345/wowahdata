@@ -73,6 +73,27 @@ async function main() {
     page.on("pageerror", (e) => errors.push(e.message));
     const label = `${vp.width}×${vp.height}`;
 
+    // Every view of every primary chart on the page, through whichever switcher
+    // is showing (segmented when the block is wide, a select when it is narrow),
+    // then back to the first view.
+    const cycleViews = async (wsName, baseline) => {
+      const blocks = await page.$$eval("[data-view-switch]", (els) => els.map((el) => el.closest("[data-block-id]").dataset.blockId));
+      for (const id of blocks) {
+        const sw = page.locator(`[data-block-id="${id}"] [data-view-switch]`);
+        const select = sw.locator("select");
+        const useSelect = await select.isVisible();
+        const labels = useSelect
+          ? await select.locator("option").allTextContents()
+          : await sw.getByRole("radio").allTextContents();
+        for (const label of [...labels.slice(1), labels[0]]) {
+          await step(`${wsName}: ${id} view ${label}`, baseline, async () => {
+            if (useSelect) await select.selectOption({ label });
+            else await sw.getByRole("radio", { name: label, exact: true }).click();
+          });
+        }
+      }
+    };
+
     const step = async (name, baseline, action) => {
       await action();
       await settle(page);
@@ -97,7 +118,7 @@ async function main() {
       await page.getByRole("button", { name: "More" }).click();
       await page.getByRole("button", { name: /Manage data/ }).click();
       await page.getByRole("button", { name: /sample/i }).click();
-      await page.waitForSelector('[data-block-id="timing-heatmap"] [role=gridcell]', { timeout: 30000 });
+      await page.waitForSelector('[data-block-id="timing"] [role=gridcell]', { timeout: 30000 });
     });
 
     // Item workspace
@@ -124,7 +145,7 @@ async function main() {
       await step(`heatmap mode ${mode}`, item, () => page.getByRole("radio", { name: mode, exact: true }).first().click());
     }
     await step("hover heatmap cells", item, async () => {
-      const cells = page.locator('[data-block-id="timing-heatmap"] [role=gridcell]');
+      const cells = page.locator('[data-block-id="timing"] [role=gridcell]');
       for (const i of [0, 30, 99, 167]) await cells.nth(i).hover({ force: true });
     });
     for (const w of ["Middle 90%", "Full", "Fit"]) {
@@ -143,33 +164,38 @@ async function main() {
     }
     await step("range with no data for this item", item, async () => {
       await page.goto(`${BASE}/?item=Mountain+Silversage&range=custom&start=2026-05-01&end=2026-05-06`, { waitUntil: "networkidle" });
-      await page.waitForSelector('[data-block-id="timing-heatmap"]');
+      await page.waitForSelector('[data-block-id="timing"]');
     });
+
+    await page.goto(`${BASE}/`, { waitUntil: "networkidle" });
+    await page.waitForSelector('[data-block-id="timing"] [role=gridcell]');
+    await cycleViews("item", await snapshot(page));
 
     // Portfolio
     await page.goto(`${BASE}/?ws=portfolio`, { waitUntil: "networkidle" });
-    await page.waitForSelector('[data-block-id="item-ledger"] [role=row]');
+    await page.waitForSelector('[data-block-id="items"] [role=row]');
     await settle(page);
     const portfolio = await snapshot(page);
     for (const r of ["Outputs", "Inputs", "Flips", "All"]) {
       await step(`ledger role ${r}`, portfolio, () => page.getByRole("radio", { name: r, exact: true }).first().click());
     }
-    await step("ledger filter with no match", portfolio, () => page.getByPlaceholder("item name").fill("zzzz"));
-    await step("ledger filter cleared", portfolio, () => page.getByPlaceholder("item name").fill(""));
+    await step("ledger filter with no match", portfolio, () => page.getByPlaceholder("Filter items").fill("zzzz"));
+    await step("ledger filter cleared", portfolio, () => page.getByPlaceholder("Filter items").fill(""));
     await step("ledger sort and row click", portfolio, async () => {
       await page.getByRole("button", { name: /Sold/ }).first().click();
-      await page.locator('[data-block-id="item-ledger"] [role=row][aria-rowindex="3"]').click();
+      await page.locator('[data-block-id="items"] [role=row][aria-rowindex="3"]').click();
     });
-    await step("concentration spend", portfolio, () => page.getByRole("radio", { name: "Spend", exact: true }).first().click());
+    await cycleViews("portfolio", portfolio);
 
     // Pipeline
     await page.goto(`${BASE}/?ws=pipeline`, { waitUntil: "networkidle" });
-    await page.waitForSelector('[data-block-id="pipeline-balance"]');
+    await page.waitForSelector('[data-block-id="pipeline"]');
     await settle(page);
     const pipeline = await snapshot(page);
     for (const s of ["Canceled", "Expired", "Revenue"]) {
       await step(`outcomes sort ${s}`, pipeline, () => page.getByRole("radio", { name: s, exact: true }).first().click());
     }
+    await cycleViews("pipeline", pipeline);
 
     // Workspace switch: persistent bars stay put.
     const pick = (s) => Object.fromEntries(Object.entries(s).filter(([k]) => /region:(scope-bar|context-bar|workspace-nav)/.test(k)));
@@ -191,7 +217,7 @@ async function main() {
     // not pull the static bar back in (the canvas min-height guarantees it).
     {
       await page.goto(`${BASE}/`, { waitUntil: "networkidle" });
-      await page.waitForSelector('[data-block-id="timing-heatmap"] [role=gridcell]');
+      await page.waitForSelector('[data-block-id="timing"] [role=gridcell]');
       await page.evaluate(() => window.scrollTo(0, 600));
       await settle(page);
       const before = await page.evaluate(() => document.querySelector('[data-region="context-bar"]').getBoundingClientRect().top);
