@@ -71,10 +71,10 @@ every data state, including "no data loaded yet".
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
-│ A  scope bar      44px   brand · edition · market ▾ ········ status · ⋯ │  static
+│ A  scope bar      44px   brand · edition · market ▾ · zone ▾ ·· status · ⋯ │  static
 ├──────────────────────────────────────────────────────────────────────────┤
-│ B  context bar    48px   [active item] chips… +N  [search]  │ range ▾   │  sticky
-│ C  workspace nav  40px   Timing  Prices  Pipeline  Listings  …   More ▾ │  sticky
+│ B  context bar    48px   [item ▾] quick · quick · quick …   │ range     │  sticky
+│ C  workspace nav  40px   Item   Pipeline   Portfolio              More ▾ │  sticky
 ├──────────────────────────────────────────────────────────────────────────┤
 │ D  KPI strip      88px   six kpi slots                                   │
 │ E  canvas                workspace grid (§5), min-height fills viewport  │
@@ -85,8 +85,8 @@ every data state, including "no data loaded yet".
 
 | Region | Height | Contents | Overflow behaviour |
 | --- | ---: | --- | --- |
-| A scope bar | 44 | Brand, edition switch, market switch, dataset status, Manage data | Market switch is one 240px button showing `US · PvP · Horde`, truncated; it opens a popover listbox grouped region → ruleset → house, max-height 360px with internal scroll. Twelve markets or sixty cost the same 240px. |
-| B context bar | 48 | Active-item slot, pinned chips, item search, range | See below. |
+| A scope bar | 44 | Brand, edition switch, market switch, display-zone switch, dataset status, Manage data | Market switch is one 240px button showing `US · PvP · Horde`, truncated; it opens a popover listbox grouped region → ruleset (the dataset) → house (a filter inside it, including "All houses"), max-height 360px with internal scroll. Twelve markets or sixty cost the same 240px. The display-zone switch is a 132px button (`Local · AEDT`) opening a searchable popover of IANA zones. |
+| B context bar | 48 | Subject combobox, quick row, range | See below. |
 | C workspace nav | 40 | One tab per workspace | Single line; tabs that do not fit collapse into `More ▾`. |
 | D KPI strip | 88 (wide), 188 (medium), 264 (narrow) | Exactly six `kpi` slots | A workspace supplies up to six KPIs; unused slots render as blank cells. The strip never changes height within a breakpoint. |
 | E canvas | content | Workspace grid | `min-height` set to the viewport minus the chrome above it, so a short workspace never makes the document shorter than the viewport. |
@@ -112,28 +112,33 @@ Decisions:
 ### Context bar in detail
 
 ```
-[ active item ········ × ] [chip][chip][chip][chip] [+7] [ 🔍 search…      ] │ [All][7d][30d][Week ▾][Custom ▾]  Nov 4 – Nov 24
-   260px fixed               fills remaining width   44    240px fixed          segmented, fixed            168px fixed
+[ Greater Planar Essence ···· ▾ ] [quick][quick][quick][quick][quick] │ [This week][7d][30d][90d][All] [Custom ▾]  Nov 4 – Nov 24
+   260px fixed combobox             five 132px slots, OverflowRow        segmented, fixed            92px     168px fixed
 ```
 
-- **Active-item slot (260px).** Always shows the current item, truncated with
-  the full name in `title`. This replaces the appended "pinned" chip, so
-  selecting any item — curated or not, short name or
-  `Pattern: Comfortable Leather Hat` — changes text inside a fixed box. On
-  portfolio workspaces (no single item) the slot reads "All items" and the
-  chips are disabled, not removed.
-- **Pinned chips.** One line, `flex-nowrap; overflow: hidden`. A shared
-  `OverflowRow` primitive measures children with a `ResizeObserver` and moves
-  those that do not fit into the `+N` menu. The `+N` button's 44px is reserved
-  even when N is 0. Chip widths depend on the dataset, so they can change when
-  the dataset or market changes, never on item selection.
-- **Search (240px).** Results render in a popover (as they already do,
-  `ItemChips.tsx:201-204`), virtualised once the item list passes ~200 entries.
-- **Range.** A segmented control plus a fixed-width, tabular-numeral label for
-  the resolved dates. `Week ▾` and `Custom ▾` open popovers; the inline form at
-  `DateRangePicker.tsx:96` goes away.
+- **Subject combobox (260px).** Always shows the current item, truncated with
+  the full name in `title`; typing in it searches. Its overlay list has the
+  sections `05-block-catalog.md` §7 specifies (Pinned, Top by revenue, All) and
+  is virtualised past ~200 entries. This one control replaces today's chip
+  row, appended "pinned" chip and separate search field, so selecting any item
+  — curated or not, short name or `Pattern: Comfortable Leather Hat` — changes
+  text inside a fixed box. On the Pipeline workspace the same slot is the
+  pipeline combobox; on Portfolio it reads "All items" and is disabled, not
+  removed.
+- **Quick row.** At most five fixed-width (132px) slots: pinned items first,
+  then top-by-revenue to fill. One line, `flex-nowrap; overflow: hidden`,
+  inside the shared `OverflowRow` primitive, which measures with a
+  `ResizeObserver` and drops slots from the end when the bar is too narrow
+  (they remain reachable in the combobox). A sixth slot never appears, and
+  which items fill the slots can change when the dataset, market or range
+  changes — never on item selection. Slots are disabled, not removed, on
+  workspaces without a single item.
+- **Range.** A five-option segmented control, one `Custom ▾` button whose
+  popover holds both the reset-week picker and the date inputs, and a
+  fixed-width, tabular-numeral label for the resolved dates. The inline form
+  at `DateRangePicker.tsx:96` goes away.
 
-`OverflowRow` is used three times — chips, workspace tabs, and block toolbars —
+`OverflowRow` is used three times — the quick row, workspace tabs, and block toolbars —
 so "too many things for one line" has a single implementation.
 
 ### Upload, manage data, onboarding
@@ -206,9 +211,8 @@ export type SizeToken = "kpi" | "S" | "M" | "L" | "XL";
 export type BodyKind = "stat" | "chart" | "grid" | "table";
 
 export interface BlockContext {
-  scope: ScopeRef;        // edition + market — owned by 03-data-architecture
-  item: ItemRef | null;   // null on portfolio workspaces
-  range: RangeRef;
+  scope: QueryScope;      // dataset, house, range, tz, source — owned by 03-data-architecture
+  subject: ItemRef | { pipeline: string } | null;   // null on portfolio workspaces
 }
 
 export interface BlockBodyProps<D, L> {
@@ -228,14 +232,14 @@ export interface BlockDefinition<Q = unknown, D = unknown, L = {}> {
   requires: Capability[];                    // enum owned by 03-data-architecture
   needsItem: boolean;
   local?: LocalStateSpec<L>;                 // toolbar controls + defaults
-  query: (ctx: BlockContext, local: L, box: { width: number }) => Q;
+  query: (ctx: BlockContext, local: L) => Q;   // ctx.scope carries the time bucket
   load: () => Promise<{ default: React.ComponentType<BlockBodyProps<D, L>> }>;
 }
 
 export interface WorkspaceDefinition {
   id: string;                                // URL path segment
   label: string;
-  kind: "item" | "portfolio";
+  kind: "item" | "pipeline" | "portfolio";    // what the subject combobox selects
   kpis: string[];                            // ≤ 6 block ids, all size "kpi"
   blocks: string[];                          // block ids in placement order
 }
@@ -247,8 +251,10 @@ export interface WorkspaceDefinition {
   coordinates. A unit test runs `layoutWorkspace(def, breakpoint)` — a pure
   function that also serves the geometry tests in §8 — and fails if any
   breakpoint leaves a hole in a row or a `kpis` entry is not size `kpi`.
-- **`query` receives the body width** so the data layer can bucket long
-  histories to a point budget that fits the pixels available.
+- **The time bucket is part of the context**, derived from the range (day up
+  to six weeks, reset week up to a year, month beyond — `05-block-catalog.md`
+  §2). Every time axis therefore has at most about 60 columns whatever the
+  history length, and a block never chooses its own bucket.
 - **Adding a block** is one definition, one body file, one line in a workspace.
 
 ### Routing
@@ -393,8 +399,8 @@ These stop movement *inside* a block, where containment cannot help.
 | Bundle size | `load()` is a dynamic import per body. Chart.js lands in a shared chunk pulled by the first chart body. The Suspense fallback for code is the same skeleton as for data. |
 | A block that throws | Per-block error boundary rendering the `error` state in place; reset when `ctx` changes. |
 | 12 markets per region | One fixed-width market switch (§3). Cross-market comparison is small multiples **inside** one `L`/`XL` block with a fixed cell grid; market count never changes block count. |
-| 1,000+ items | Fixed active-item slot, virtualised search popover, virtualised tables, truncation everywhere a name appears. |
-| Long histories | `query` receives the body width, so time series arrive already bucketed to roughly one point per 2–3px; the axis keeps a fixed tick count; zoom and brush are in-canvas overlays. |
+| 1,000+ items | Fixed subject combobox with a virtualised overlay, virtualised tables, truncation everywhere a name appears. |
+| Long histories | The time bucket is derived from the range, so a series has at most about 60 columns and a price timeline at most 60 × 48 × 2 marks; the axis keeps a fixed tick count; zoom and brush are in-canvas overlays. |
 | Slow computation | Item and range changes are wrapped in `startTransition`; blocks show the stale state while workers compute, so controls respond immediately and nothing blanks. |
 
 ## 8. Verification
@@ -413,7 +419,7 @@ Classic export, large synthetic Forever export, none) × every workspace:
 
 | Interaction | Asserted invariant |
 | --- | --- |
-| Item: each chip, a searched 40-character name, an item with zero rows in range, the synthetic gear bucket | all regions, blocks and plot rects |
+| Item: each quick-row slot, a searched 40-character name, an item with zero rows in range, an item group | all regions, blocks and plot rects |
 | Range: each preset, open and apply Custom, a range with no data | all regions, blocks and plot rects |
 | Market / edition switch, including a market with no data | all regions and blocks |
 | Every toolbar control of every block | all regions and blocks |
@@ -453,7 +459,7 @@ geometry test.
    as bodies and map their early returns to `empty`. Move `CellTooltip` into
    the readout slot. Tabs remain, each showing one block. Fixes audit rows 2, 8
    and 9 and reduces row 1 to two heights (`L` and `XL`).
-4. **Build the shell bars.** `OverflowRow`, active-item slot, range popovers,
+4. **Build the shell bars.** `OverflowRow`, subject combobox, quick row, range popover,
    data dialog, status chip in bar A, onboarding block, shell-shaped boot.
    Fixes rows 3–7.
 5. **Registry, workspaces and `/w/[workspace]`.** Stat cards become `kpi`
@@ -476,6 +482,6 @@ Steps 1–5 are edition-agnostic and improve the Classic dashboard on their own.
   Detail-on-hover goes in the readout, not a tooltip that needs space.
 - **Data:** `useBlockQuery` must accept an `enabled` flag (lazy mounting), keep
   the previous result while revalidating, distinguish `empty` from `ready`, and
-  accept a point budget derived from pixel width. The capability set must be
+  take its time bucket from the shell. The capability set must be
   resolvable synchronously from the loaded dataset so an unavailable block
   never flashes a skeleton first.

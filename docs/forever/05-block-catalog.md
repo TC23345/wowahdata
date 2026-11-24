@@ -38,7 +38,8 @@ zone control.
 
 | Control | Behaviour |
 | --- | --- |
-| Scope | One dataset = edition × region × ruleset × faction, as mapped at import. Display only, plus a switcher when more than one is loaded. |
+| Market | A dataset is edition × region × ruleset, mapped at import; house (All · Alliance · Horde · Blackwater · Unassigned) is a filter inside it, derived from each character's faction and the trader's own Blackwater rules (`03-data-architecture.md` §3). One switcher covers both. |
+| Source | Every block counts auction rows only, and says so in its idle text. Vendor, trade and COD rows appear only in `fees` and, when a pipeline opts in, in that pipeline's inputs. |
 | Workspace | `Item` · `Pipeline` · `Portfolio` (section 3). |
 | Item | A single combobox showing the selected item. Opens an overlay list; never renders the selection as an extra chip. Details in section 7. |
 | Pipeline | Same combobox pattern; visible in place of Item on the Pipeline workspace. |
@@ -51,7 +52,9 @@ two blocks can disagree about which day a sale happened. A Forever market spans
 many zones (Oceania trades on the US market; all of Europe shares one), so the
 trader's own zone, the market's peak zone and UTC are all legitimate readings.
 Requirement on the data layer: every time-keyed aggregate can be re-bucketed for
-any IANA zone, including :30 and :45 offsets (Adelaide trades on the US market).
+any IANA zone. The data layer's time atom is the UTC hour, so zones offset by 30
+or 45 minutes (Adelaide trades on the US market) are binned by the local time at
+the start of each UTC hour; the zone label carries a `≈` in that case.
 
 **Time bucket is derived from the range**, never chosen: up to 6 weeks → day;
 up to 1 year → reset week; longer → calendar month. This caps every time axis at
@@ -129,7 +132,7 @@ plus the KPI strip cover all three workspaces.
 | `outcomes-by-item` | Outcomes by item | `M` | Pipeline, Portfolio | `listingOutcomes` | redesign of sell-through |
 | `item-ledger` | Items | `L` | Portfolio | `sales` or `purchases` | new |
 | `concentration` | Revenue concentration | `S` | Portfolio | `sales` | new |
-| `house-split` | By auction house | `S` | Portfolio | `houseAttribution` | new, unavailable at launch |
+| `house-split` | By auction house | `S` | Portfolio | `houseAttribution` | new; needs the character → faction mapping |
 | `fees` | Fees and upkeep | `S` | Portfolio | `ledger` | cash flow, demoted |
 
 Conventions for every spec below:
@@ -170,7 +173,9 @@ Conventions for every spec below:
   fourth mode, `Market`, shows market-wide units cleared per slot, and the
   readout gains `Your share`. At that point the confound is resolved by
   comparison; nothing in the block's geometry changes because the control gains
-  one option within the same row.
+  one option within the same row. Hourly snapshots exist only behind Blizzard's
+  API, which needs a server-side secret, so this mode is outside a client-only
+  app and is not planned (`03-data-architecture.md` §4).
 
 ### `price-timeline` — Price over time
 
@@ -229,7 +234,9 @@ Conventions for every spec below:
   ring at the median sell, joined by a line. Buckets with only one side show the
   single dot.
 - **Needs:** per item, time bucket: median buy price, median sell price, units
-  on each side.
+  on each side. Medians are read from the same binned price grid that
+  `price-timeline` uses, so they are exact to one price bin and need no row
+  access.
 - **Toolbar:** `Gold · Percent`.
 - **Readout:** `Week` of 17 Nov · `Buy` 6g 15s · `Sell` 6g 57s · `Spread` +6.8% ·
   `Units` 120 / 410.
@@ -269,19 +276,23 @@ Conventions for every spec below:
 - **Unavailable:** "Needs both the purchases and sales files."
 - **Status:** new. This is the built-out form of the "DE source" card.
 
-**Pipelines.** A pipeline is a named pair of item sets. The export records no
-conversions, so membership is a user-owned definition with generated defaults:
+**Pipelines.** A pipeline is a named pair of item sets, stored as
+`03-data-architecture.md` §8 defines: each member carries a `share` of that
+item's cost or revenue, shares for one item sum to at most 1 across pipelines,
+and whatever is left is reported as "unassigned" so pipelines plus unassigned
+always equal the portfolio. The export records no conversions, so membership is
+a user-owned definition with generated defaults:
 
-- An item's *role* in a range is `input` when bought units are at least ten
-  times sold units, `output` when at least half its sold units were not bought
-  on the AH, otherwise `flip`.
-- On first load one pipeline, "All conversions", holds every input and output,
-  so the workspace is useful with no setup. The trader splits it (for the
-  sample: gear → dust, essences, shards; cloth → bolts and bags).
+- An item's *role* in a range is `input` when its sold units are under 10% of
+  its bought units, `output` when at least half its sold units were not bought
+  on the AH (sold − bought ≥ half of sold; expired units are not added, see
+  section 5), otherwise `flip`.
+- On first load one generated pipeline, "All conversions", holds every input
+  and output at share 1, so the workspace is useful with no setup. The trader
+  splits it (for the sample: gear → dust, essences, shards; cloth → bolts and
+  bags).
 - Each `flip` item is its own one-item pipeline, on both sides.
-- Every revenue-bearing item therefore belongs to exactly one pipeline, and that
-  is where its profit is stated.
-- Membership rules may be item ids or item-string patterns. The random-enchant
+- Membership rules may be item keys or item-string patterns. The random-enchant
   gear bucket is a pattern rule, because Forever's suffix format is unknown.
 
 ### `cumulative-flow` — Spend vs revenue
@@ -344,18 +355,25 @@ conversions, so membership is a user-owned definition with generated defaults:
 
 ### `house-split` — By auction house
 
-- **Question:** how much went through the neutral house, and what did the
-  higher cut cost?
-- **Mark:** three bars (faction house, Blackwater, unattributed) with revenue
-  and estimated cut paid.
-- **Needs:** revenue and units per house; cut rate per house from the profile.
-- **Capability:** `houseAttribution`.
-- **Unavailable (the launch state):** "The export does not say which auction
-  house a sale went through. This block fills in if the Forever export carries
-  a house field. Until then every sale is treated as faction-house (5% cut —
-  editable in dataset settings)."
+- **Question:** how much went through each house, and what did the neutral
+  house's higher cut cost?
+- **Mark:** four fixed rows (Alliance, Horde, Blackwater, Unassigned) with
+  revenue and estimated cut paid.
+- **Needs:** revenue and units per house; cut rate per house from the dataset
+  settings.
+- **Capability:** `houseAttribution`, which the data layer reports with a
+  coverage figure. Faction houses follow from each character's faction, set once
+  at import. Blackwater sales are indistinguishable in the export, so they
+  appear only where the trader has written a rule (character, item or date
+  range → Blackwater).
+- **Readout:** `House` · `Revenue` · `Units` · `Cut rate` 15% · `Est. cut paid`,
+  the last as a low–high range for unassigned rows.
+- **Idle:** "Faction from your characters; Blackwater only where you have told
+  the tool. {coverage}% of auction revenue attributed."
+- **Unavailable:** "Assign each character a faction in dataset settings to
+  split revenue by auction house."
 - **Status:** new. The 5% and 15% cuts are single-source figures, so they are
-  profile values and never constants in a block.
+  dataset settings and never constants in a block.
 
 ### `fees` — Fees and upkeep
 
@@ -444,6 +462,10 @@ prints `—` and a one-line reason; it never disappears.
 - The current `33.7kg` suffix reads as kilograms; it becomes `33.7k g`.
 - Unit prices are labelled "per unit, net to you". No block reconstructs the
   buyer's gross price except `house-split`, which knows the cut.
+- Whether a Forever sale row is recorded net of the cut is unknown. The dataset
+  setting defaults to net (what TSM records in every other edition), figures are
+  shown as recorded, and until the trader confirms the basis the dataset status
+  chip and every block footer that shows gold carry "price basis unconfirmed".
 - All numerals are tabular. Units are integers with separators.
 
 **Time.**
@@ -463,11 +485,12 @@ everything below it). It is replaced by three things, none of which can wrap:
    All (search, ranked by revenue then activity). Each entry shows role and,
    when known, commodity or item. Arrow keys step through the ranked list
    without opening it.
-2. **Quick row.** Exactly five fixed-width slots beside the combobox: pinned
+2. **Quick row.** At most five fixed-width slots beside the combobox: pinned
    items first, then top-by-revenue to fill. Labels truncate. Selecting an item
    outside the five changes the combobox only; a sixth slot never appears. Five
    is enough: the top four items are 82% of sample revenue and the top eight 90%.
-   Below the layout's narrow breakpoint the row is hidden and the combobox remains.
+   When the bar is too narrow the layout's `OverflowRow` drops slots from the
+   end; the combobox always remains.
 3. **`item-ledger`.** The browsing surface, for when the question is "what
    should I be looking at".
 
@@ -498,7 +521,7 @@ quantity, a unit price and a time, mapped at import:
 `kpi-strip`, `timing-heatmap`, `price-timeline`, `post-windows`, `spread-weeks`,
 `outcomes-trend`, `outcomes-by-item`, `cumulative-flow`, `pipeline-balance`
 (with the generated "All conversions" pipeline), `item-ledger`, `concentration`,
-`fees` (if ledger files exist). `house-split` ships in its unavailable state.
+`fees` (if ledger files exist), and `house-split` for the two faction houses.
 
 Phase 1 is safe against the open unknowns because it counts units and gold, bins
 prices, takes the reset day and cut from settings, and treats item grouping as
@@ -508,7 +531,7 @@ pattern rules.
 
 | Feature | Waits on |
 | --- | --- |
-| `house-split`, cut paid, gross prices | Whether the export attributes a sale to a house (unknown 2). |
+| Blackwater in `house-split` without hand-written rules | Whether the export attributes a sale to a house (unknown 2). Faction houses work from day one via the character → faction mapping. |
 | Forfeited deposits in `fees` and as a KPI | Deposit formula and whether the export records deposits (unknown 6). |
 | Commodity / item tag in ledger and combobox | A reliable per-item kind; the commodity list is single-source (unknown 3). |
 | Default random-enchant group for Forever | The Forever item-string format (unknown 4). |
@@ -517,8 +540,8 @@ pattern rules.
 | Raid-reset reading of the heatmap | Raids opening on 9 Dec 2026, then several weeks of data. |
 
 **Phase 2 — `marketContext`.** Market-value line on `price-timeline`, a market
-column in `item-ledger` (daily values), and the `Market` mode and `Your share`
-readout on `timing-heatmap` (hourly snapshots). This is the only phase that
-fetches anything from outside the browser, so it is opt-in and must be squared
-with the tool's "your data never leaves your browser" promise and with the data
-source's attribution and republishing terms.
+column in `item-ledger`, both from a daily TSM public-data file the trader drops
+in or opts in to fetch. This is the only phase that can fetch anything from
+outside the browser; the rules that keep it compatible with "your trading data
+never leaves your browser" are in `03-data-architecture.md` §4. The heatmap's
+`Market` mode needs hourly snapshots and therefore a server; it is not planned.
