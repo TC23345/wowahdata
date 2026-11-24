@@ -429,9 +429,14 @@ type Pipeline = {
 - **Invariant:** across all pipelines the `share` values for an item sum to at
   most 1. The remainder is reported as "unassigned", so pipeline totals plus
   unassigned equal the portfolio total.
-- **What it computes:** per range, output received − input cost; units in and
-  out; with yields, expected output and the implied stock not yet sold. All from
-  `itemWeek`, summed over member items.
+- **What it computes:** per range, pipeline margin = Σ over members of
+  `share × (received − cost)`, counting every member on both sides: an output
+  that was also bought on the AH contributes that cost, an input that was partly
+  resold contributes that revenue. This is what makes pipelines plus unassigned
+  equal the portfolio. On the sample, "All conversions" is 99,085g sold −
+  108,776g bought = −9,691g, and with the 48 flips (−2,208g) reaches the
+  portfolio's −11,899g. Also units in and out and, with yields, expected output
+  and the implied stock not yet sold. All from `itemWeek`.
 - **Storage:** per dataset in IndexedDB. With no server, settings, groups and
   pipelines export and import as one JSON file, which is never transmitted.
 - The Classic profile ships two unconfirmed templates (disenchanting, Netherweave

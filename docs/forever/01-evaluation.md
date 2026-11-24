@@ -105,6 +105,11 @@ This is the largest gap between what the trader does and what the tool shows.
 ### 4. Sell-through measures the wrong outcome
 
 - Row sell-through is 96.2% overall; 53 of 98 qualifying items are at 100%.
+- Counted by units and including cancels, the picture inverts: 53,040 units
+  sold, 17,231 expired and 12,305 canceled, so only 64% of listed units sold on
+  the attempt. For the two largest items it is 61% (Greater Planar Essence) and
+  59% (Arcane Dust). Rows hide this because one expired row can be a whole
+  posting of stacks.
 - Of the 12 "slow" flags, 11 are items with 3–11 lifetime events (Sword of Zeal,
   Mountain Silversage, recipe drops). The twelfth is DE Gear, which is bought to
   be disenchanted and is not meant to sell. None is where the gold is.
@@ -118,8 +123,8 @@ revenue would say something; a two-way ratio on rows does not.
 ### 5. Cash flow is negligible at this scale
 
 Postage 6.9g and repairs 33.1g across 15 weeks, against 103,339g of AH revenue.
-"Money Transfer" rows (4,162g out, 1,380g in) are movements between the trader's
-own characters. It does not earn a top-level tab.
+"Money Transfer" rows (4,162g out, 1,380g in) are gold sent to and received from
+other characters, not a cost of trading. It does not earn a top-level tab.
 
 ### 6. Things the data says are *not* worth building
 

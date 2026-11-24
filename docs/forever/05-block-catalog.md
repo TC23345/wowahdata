@@ -263,9 +263,12 @@ Conventions for every spec below:
 ### `pipeline-balance` — Inputs and outputs
 
 - **Question:** what went into this conversion, what came out, and what is left?
-- **Mark:** two ranked bar lists sharing a gold axis, inputs growing left from a
-  centre gutter and outputs growing right. Six rows per side plus an "Other
-  (n items)" row, always seven rows. The gutter shows the pipeline margin.
+- **Mark:** two ranked bar lists sharing a gold axis: what member items cost
+  growing left from a centre gutter, what they earned growing right. Each side
+  ranks every member, so an output that was also bought on the AH appears on
+  the left as well. Six rows per side plus an "Other member items" row, always
+  seven rows. The gutter shows the pipeline margin, sold − bought over all
+  members, uncoloured and captioned "stock on hand is not counted".
 - **Needs:** per pipeline: for each member item, side, units, gold, average unit
   price; totals per side. Pipeline definitions (below).
 - **Toolbar:** `Gold · Units`; an `Edit pipeline` button that opens an overlay.
@@ -397,11 +400,11 @@ prints `—` and a one-line reason; it never disappears.
 
 | # | Item workspace | Pipeline workspace | Portfolio workspace |
 | --- | --- | --- | --- |
-| 1 | **Revenue** · units · avg/unit | **Output revenue** · units | **Revenue** · sold items |
-| 2 | **Spend** · units · avg/unit | **Input spend** · units | **Spend** · bought items |
-| 3 | **Flip margin** | **Pipeline margin** (coloured) | **Net gold flow** (uncoloured) |
+| 1 | **Revenue** · units · avg/unit | **Sold** · units, all members | **Revenue** · sold items |
+| 2 | **Spend** · units · avg/unit | **Bought** · all members | **Spend** · bought items |
+| 3 | **Flip margin** (coloured) | **Pipeline margin** (uncoloured) | **Net gold flow** (uncoloured) |
 | 4 | **Off-AH supply** | **Margin %** of spend | **80% of revenue from** n items |
-| 5 | **Listing success** | **Listing success** (outputs) | **Listing success** |
+| 5 | **Listing success** | **Listing success** (members) | **Listing success** |
 | 6 | **Peak 8 hours** | **Top output** · share | **Fees and upkeep** |
 
 - **Flip margin** replaces per-item Net P&L: matched units (the smaller of
@@ -420,7 +423,11 @@ prints `—` and a one-line reason; it never disappears.
   listing duration.
 - **Net gold flow** is never coloured as profit or loss. The sample portfolio is
   −11,899g over the range with stock on hand that the export cannot see.
-- Only **Pipeline margin** carries profit/loss colour.
+- **Pipeline margin** is sold − bought over every member item, on both sides.
+  It is not coloured either, for the same reason: the sample's generated "All
+  conversions" pipeline reads −9,691g with unsold stock the export cannot see.
+- Only **Flip margin** carries profit/loss colour, because it is computed on
+  matched units and so does not depend on stock.
 
 ## 6. Encoding rules
 
