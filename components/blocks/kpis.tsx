@@ -5,13 +5,13 @@ import { Money } from "@/components/ah/Money";
 import { binToHeatmap } from "@/lib/heatmap";
 import { feesSummary, isAuction, itemsForShare, listingSuccess, peakHours, sumCopper, sumUnits } from "@/lib/insights";
 import { formatMoney } from "@/lib/money";
-import type { KpiId } from "@/lib/workspaces";
+import type { KpiId } from "@/lib/pages";
 import type { BlockCtx } from "./context";
 import { pad2, pct, tzLabel, units } from "./types";
 
 export type KpiValue = { label: string; value: ReactNode; sub: string };
 
-/** Each KPI card's content. Six per workspace, always in the same slots. */
+/** Each KPI card's content. Six per scope, always in the same slots. */
 export function kpiValue(id: KpiId, ctx: BlockCtx): KpiValue {
   const item = ctx.itemSet;
   const sold = item.sales.filter(isAuction);
@@ -20,7 +20,7 @@ export function kpiValue(id: KpiId, ctx: BlockCtx): KpiValue {
   const bu = sumUnits(bought);
   const sg = sumCopper(sold);
   const bg = sumCopper(bought);
-  const scope = ctx.workspace.id === "item" ? null : ctx.scopeLedger;
+  const scope = ctx.scope === "item" ? null : ctx.scopeLedger;
 
   switch (id) {
     case "kpi-revenue": {

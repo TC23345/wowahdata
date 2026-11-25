@@ -713,7 +713,7 @@ export function OutcomesTimeView({ slot, ctx, stale, viewSwitch, title }: ViewPr
   const tot = series.reduce((s, b) => ({ sold: s.sold + b.sold, expired: s.expired + b.expired, canceled: s.canceled + b.canceled }), { sold: 0, expired: 0, canceled: 0 });
   const success = listingSuccess(tot.sold, tot.expired, tot.canceled);
   const h = hover == null ? null : series[hover];
-  const scopeLabel = ctx.workspace.id === "item" ? ctx.item : ctx.workspace.id === "pipeline" ? "All conversions" : "All items";
+  const scopeLabel = ctx.scope === "item" ? ctx.item : ctx.scope === "pipeline" ? "All conversions" : "All items";
 
   return (
     <BlockShell
@@ -784,7 +784,7 @@ export function OutcomesItemView({ slot, ctx, stale, viewSwitch, title }: ViewPr
     const top = [...listed].sort((a, b) => b.revenue - a.revenue).slice(0, 24);
     return top.sort((a, b) => key(b) - key(a)).slice(0, 8);
   }, [ctx.scopeLedger, sort]);
-  const scopeLabel = ctx.workspace.id === "pipeline" ? "All conversions" : "All items";
+  const scopeLabel = ctx.scope === "pipeline" ? "All conversions" : "All items";
 
   return (
     <BlockShell

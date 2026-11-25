@@ -6,29 +6,27 @@ A public, client-side dashboard for WoW auction-house traders. Drop your **Trade
 
 ## What you get
 
-Seven primary charts, each with a view switcher, arranged into three workspaces. Switching item, range, time zone or view changes what a chart shows, never its size or position.
+Seven charts, each on its own page with a view switcher: `/timing`, `/price`, `/outcomes`, `/flow`, `/pipeline`, `/items`, `/costs`. Switching page, item, range, time zone or view changes what the chart shows, never its size or position, and the loaded data, scroll position and your item carry across pages.
 
-| Chart | Views |
+| Page | Views |
 | --- | --- |
 | **Timing** | Heatmap (day × hour, Tue → Mon rows, with a *Consistency* mode) · Listing windows (the week as 168 hourly bars, best window per auction duration) · Hour profile (the average day; all days, weekdays or weekend) |
 | **Price** | Trades (buys left, sells right, area ∝ units) · Spread (median buy → median sell per period) · Range (middle half of prices per period) |
-| **Listing outcomes** | Over time · By item (sold / canceled / expired, by units) |
-| **Spend vs revenue** | Cumulative · Per period · Net (with running total) |
+| **Outcomes** | Over time · By item (sold / canceled / expired, by units) — for this item, all conversions, or all items |
+| **Flow** | Cumulative · Per period · Net (with running total) — for all items, all conversions, or this item |
 | **Pipeline** | Balance (what went in against what came out) · Roles (inputs, outputs, flips) |
-| **Items** | Table (sortable ledger of everything you traded) · Concentration (how few items carry 80%) |
+| **Items** | Table (sortable ledger of everything you traded; pin items with ☆ or right-click) · Concentration (how few items carry 80%) |
 | **Costs** | Fees (transfers to your own characters kept out) · By auction house (fills in on Forever datasets) |
 
-- **Item** — *when does this item move, and at what price?* Timing and Price, then Outcomes and Net flow for the item.
-- **Pipeline** — *does turning these inputs into those outputs make money?* Pipeline, then cumulative flow and outcomes by item for the member items.
-- **Portfolio** — *which items carry the business?* Items, then flow, costs and outcomes by item across everything.
+Each page remembers the view you last chose. The Items table sorts by two keys (click one column, then another for the tie-breaker) and remembers its sort; money lines up by gold, silver and copper down each column, with the exact value on hover. Disabled controls say why on hover.
 
-A six-card KPI strip heads each workspace. Revenue is never taxed twice: TSM sale prices are already net of the AH cut. Figures count auction rows only.
+A six-card KPI strip heads each page and follows its scope (an item, all conversions, or all items). Revenue is never taxed twice: TSM sale prices are already net of the AH cut. Figures count auction rows only.
 
-URL search params (`?ws=`, `?item=`, `?range=`, `?start=`, `?end=`, `?tz=`) make every view shareable.
+The page path plus search params (`?item=`, `?range=`, `?start=`, `?end=`, `?tz=`, `?view=`, `?scope=`) make every view shareable; old `?ws=` and `?tab=` links still land on the matching page.
 
 ### Layout
 
-Geometry depends only on the workspace and the container width (`lib/layout.ts`, `app/globals.css`). Blocks pick one of five sizes and every state — loading, empty, error, unavailable, stale — paints the same box. `npm run check:geometry` drives the app in Chromium at four widths and fails if any bar or block moves by more than 0.5px. The design is in [`docs/forever/`](docs/forever/00-overview.md).
+Geometry depends only on the page and the container width (`lib/layout.ts`, `app/globals.css`). Blocks pick one of five sizes and every state — loading, empty, error, unavailable, stale — paints the same box. `npm run check:geometry` drives the app in Chromium at four widths through every page, view and scope and fails if any bar or block moves by more than 0.5px; every page uses the same boxes. The design is in [`docs/forever/`](docs/forever/00-overview.md).
 
 The auction-house components in `components/ah/` (results table, money display, item search) are original code whose structure follows the WoW: Forever auction house interface. No Blizzard code or art is included.
 

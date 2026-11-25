@@ -1,27 +1,36 @@
 "use client";
 
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { useSelectedLayoutSegment } from "next/navigation";
 import type { LoadedData } from "@/lib/csv";
 import { aggregateItems, type ItemSummary } from "@/lib/items";
 import { weekEndMonday, weekStartTuesday } from "@/lib/weeks";
 import { CURATED_ITEMS, DEFAULT_ITEM } from "@/lib/curated";
-import { workspaceById, workspaceForLegacyTab, type WorkspaceId } from "@/lib/workspaces";
+import { pageById, pageForLegacyParams, scopeFor, type PageId, type Scope, type ViewId } from "@/lib/pages";
+import { pinsKey, readPref, togglePinIn, writePref } from "@/lib/prefs";
 import type { DateRange } from "@/lib/insights";
 import { useDashboardParams, type DashboardParams } from "@/hooks/useDashboardParams";
 import { clearAllData, getActiveRealm, listRealms, loadRealmData, saveRealmData, setActiveRealm } from "@/lib/storage";
 import { UploadZone } from "@/components/UploadZone";
 import { buildBlockContext, deriveDataset } from "@/components/blocks/context";
-import { ContextBar, PageFooter, ScopeBar, WorkspaceNav, type RangePreset } from "@/components/shell/Bars";
-import { Workspace } from "@/components/shell/Workspace";
+import { ContextBar, PageFooter, PageNav, ScopeBar, type RangePreset } from "@/components/shell/Bars";
+import { PageView } from "@/components/shell/PageView";
 
 type LoadState = { kind: "boot" } | { kind: "empty" } | { kind: "ready"; data: LoadedData; realms: string[] };
 
 const DAY_MS = 86_400_000;
 
+type ViewMemory = Partial<Record<PageId, ViewId>>;
+
 export function Dashboard() {
+  // The active chart page is the URL segment under the shared layout ("/" is Timing).
+  const pageId = useSelectedLayoutSegment() ?? "timing";
   const [state, setState] = useState<LoadState>({ kind: "boot" });
   const [dialogOpen, setDialogOpen] = useState(false);
-  const { params, setParams } = useDashboardParams();
+  // Per-viewer conveniences, read after mount so the prerendered page matches.
+  const [views, setViews] = useState<ViewMemory>({});
+  const [pins, setPins] = useState<string[]>([]);
+  const { params, setParams, queryWith } = useDashboardParams();
 
   useEffect(() => {
     let cancelled = false;
@@ -30,6 +39,8 @@ export function Dashboard() {
       const active = realms.length ? (await getActiveRealm()) ?? realms[0] : null;
       const data = active ? await loadRealmData(active) : null;
       if (cancelled) return;
+      setViews(readPref<ViewMemory>("views", {}));
+      if (data) setPins(readPref<string[]>(pinsKey(data.realm), []));
       if (data) setState({ kind: "ready", data, realms });
       else {
         setState({ kind: "empty" });
@@ -44,6 +55,7 @@ export function Dashboard() {
   const onLoaded = useCallback(async (data: LoadedData) => {
     await saveRealmData(data);
     const realms = await listRealms();
+    setPins(readPref<string[]>(pinsKey(data.realm), []));
     setState({ kind: "ready", data, realms });
     setDialogOpen(false);
   }, []);
@@ -51,6 +63,7 @@ export function Dashboard() {
   const onSwitchRealm = useCallback(async (realm: string) => {
     await setActiveRealm(realm);
     const data = await loadRealmData(realm);
+    if (data) setPins(readPref<string[]>(pinsKey(data.realm), []));
     if (data) setState((prev) => (prev.kind === "ready" ? { ...prev, data } : prev));
   }, []);
 
@@ -61,11 +74,37 @@ export function Dashboard() {
     setParams({ item: null, range: null, start: null, end: null, tab: null });
   }, [setParams]);
 
+  const realm = state.kind === "ready" ? state.data.realm : null;
+  const togglePin = useCallback(
+    (name: string) => {
+      if (!realm) return;
+      setPins((prev) => {
+        const next = togglePinIn(prev, name);
+        writePref(pinsKey(realm), next);
+        return next;
+      });
+    },
+    [realm],
+  );
+  const rememberView = useCallback((page: PageId, view: ViewId) => {
+    setViews((prev) => {
+      const next = { ...prev, [page]: view };
+      writePref("views", next);
+      return next;
+    });
+  }, []);
+
   return (
     <Frame
+      pageId={pageId}
       state={state}
       params={params}
       setParams={setParams}
+      queryWith={queryWith}
+      views={views}
+      rememberView={rememberView}
+      pins={pins}
+      togglePin={togglePin}
       onSwitchRealm={onSwitchRealm}
       onManage={() => setDialogOpen(true)}
       dialog={
@@ -82,34 +121,68 @@ export function Dashboard() {
 
 /** The Suspense fallback is the same shell and grid, booting. */
 export function DashboardFallback() {
-  return <Frame state={{ kind: "boot" }} params={EMPTY_PARAMS} setParams={() => {}} onSwitchRealm={() => {}} onManage={() => {}} dialog={null} />;
+  return <FallbackFrame />;
 }
 
-const EMPTY_PARAMS: DashboardParams = { item: null, range: null, start: null, end: null, tab: null, ws: null, tz: null };
+function FallbackFrame() {
+  const pageId = useSelectedLayoutSegment() ?? "timing";
+  return (
+    <Frame
+      pageId={pageId}
+      state={{ kind: "boot" }}
+      params={EMPTY_PARAMS}
+      setParams={() => {}}
+      queryWith={() => ""}
+      views={{}}
+      rememberView={() => {}}
+      pins={[]}
+      togglePin={() => {}}
+      onSwitchRealm={() => {}}
+      onManage={() => {}}
+      dialog={null}
+    />
+  );
+}
+
+const EMPTY_PARAMS: DashboardParams = { item: null, range: null, start: null, end: null, tab: null, ws: null, tz: null, view: null, scope: null };
 
 function Frame({
+  pageId,
   state,
   params,
   setParams,
+  queryWith,
+  views,
+  rememberView,
+  pins,
+  togglePin,
   onSwitchRealm,
   onManage,
   dialog,
 }: {
+  pageId: string;
   state: LoadState;
   params: DashboardParams;
   setParams: (p: Partial<DashboardParams>) => void;
+  queryWith: (p: Partial<DashboardParams>) => string;
+  views: ViewMemory;
+  rememberView: (page: PageId, view: ViewId) => void;
+  pins: string[];
+  togglePin: (name: string) => void;
   onSwitchRealm: (r: string) => void;
   onManage: () => void;
   dialog: React.ReactNode;
 }) {
   const data = state.kind === "ready" ? state.data : null;
-  const workspace = workspaceById(params.ws ?? workspaceForLegacyTab(params.tab));
+  const page = pageById(pageForLegacyParams(params.ws, params.tab) ?? pageId);
+  const scope = scopeFor(page, params.scope);
+  const view = (params.view as ViewId | null) ?? views[page.id] ?? page.defaultView;
   const tz = params.tz === "utc" ? "utc" : "local";
 
   const items = useMemo<ItemSummary[]>(() => (data ? aggregateItems(data) : []), [data]);
   const derived = useMemo(() => (data ? deriveDataset(data) : null), [data]);
   const span = useMemo(() => (data ? dataSpan(data) : null), [data]);
-  const pinned = useMemo(() => pinnedItems(items), [items]);
+  const pinned = useMemo(() => quickItems(items, pins), [items, pins]);
 
   const item = isKnownItem(items, params.item) ? params.item! : (pinned[0] ?? DEFAULT_ITEM);
   const { range, preset } = resolveRange(params, span);
@@ -120,8 +193,8 @@ function Frame({
   const dStart = useDeferredValue(range.start.getTime());
   const dEnd = useDeferredValue(range.end.getTime());
   const dTz = useDeferredValue(tz);
-  const dWs = useDeferredValue(workspace.id);
-  const stale = dItem !== item || dStart !== range.start.getTime() || dEnd !== range.end.getTime() || dTz !== tz || dWs !== workspace.id;
+  const dScope = useDeferredValue(scope);
+  const stale = dItem !== item || dStart !== range.start.getTime() || dEnd !== range.end.getTime() || dTz !== tz || dScope !== scope;
 
   const selectItem = useCallback(
     (name: string) => setParams({ item: name }),
@@ -133,13 +206,16 @@ function Frame({
     return buildBlockContext({
       data,
       derived,
-      workspace: workspaceById(dWs),
+      page,
+      scope: dScope,
       item: dItem,
       range: { start: new Date(dStart), end: new Date(dEnd) },
       tz: dTz,
       selectItem,
+      pins,
+      togglePin,
     });
-  }, [data, derived, dWs, dItem, dStart, dEnd, dTz, selectItem]);
+  }, [data, derived, page, dScope, dItem, dStart, dEnd, dTz, selectItem, pins, togglePin]);
 
   const mode = state.kind === "ready" ? "ready" : state.kind;
   const rowCount = data
@@ -170,7 +246,8 @@ function Frame({
       />
       <div className="sticky-bars">
         <ContextBar
-          workspace={workspace}
+          page={page}
+          scope={scope}
           items={items}
           pinned={pinned}
           item={item}
@@ -183,13 +260,22 @@ function Frame({
           current={{ start: isoDate(range.start), end: isoDate(range.end) }}
           ready={state.kind === "ready"}
         />
-        <WorkspaceNav
-          active={workspace.id}
-          onChange={(id: WorkspaceId) => setParams({ ws: id === "item" ? null : id, tab: null })}
-        />
+        <PageNav active={page.id} hrefFor={(id) => `/${id}${queryWith({ view: null, scope: null, ws: null, tab: null })}`} />
       </div>
       <div className="ws-canvas" data-region="canvas">
-        <Workspace workspace={workspace} ctx={mode === "ready" ? ctx : null} mode={mode} stale={stale} />
+        <PageView
+          page={page}
+          scope={scope}
+          view={view}
+          onView={(v) => {
+            rememberView(page.id, v);
+            setParams({ view: v === page.defaultView ? null : v });
+          }}
+          onScope={(sc: Scope) => setParams({ scope: sc === page.scopes[0] ? null : sc })}
+          ctx={mode === "ready" ? ctx : null}
+          mode={mode}
+          stale={stale}
+        />
       </div>
       <PageFooter>
         <span className="truncate">Auction rows only · prices per unit, as recorded (already net of the AH cut) · roles computed over all time</span>
@@ -255,14 +341,16 @@ function dataSpan(data: LoadedData): { start: Date; end: Date } | null {
   return Number.isFinite(min) ? { start: new Date(min * 1000), end: new Date(max * 1000) } : null;
 }
 
-function pinnedItems(items: ItemSummary[]): string[] {
+/** The quick row and the combobox's Pinned section: your pins first, then curated items to fill five. */
+function quickItems(items: ItemSummary[], pins: string[]): string[] {
   const byName = new Map(items.map((i) => [i.name, i]));
-  return (CURATED_ITEMS as readonly string[])
+  const own = pins.filter((n) => byName.has(n));
+  const curated = (CURATED_ITEMS as readonly string[])
     .map((n) => byName.get(n))
-    .filter((i): i is ItemSummary => Boolean(i && i.txnCount > 0))
+    .filter((i): i is ItemSummary => Boolean(i && i.txnCount > 0 && !own.includes(i.name)))
     .sort((a, b) => b.txnCount - a.txnCount)
-    .slice(0, 5)
     .map((i) => i.name);
+  return [...own, ...curated].slice(0, Math.max(5, own.length));
 }
 
 function isKnownItem(items: ItemSummary[], name: string | null): boolean {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { arrangementFor, blockHeight, layoutWorkspace, type SizeToken } from "../layout";
-import { WORKSPACES } from "../workspaces";
+import { PAGES } from "../pages";
 
 const KPIS: SizeToken[] = ["kpi", "kpi", "kpi", "kpi", "kpi", "kpi"];
 
@@ -30,14 +30,17 @@ describe("layoutWorkspace", () => {
     expect(layoutWorkspace(["S", "S"], 1393).holes).toEqual([{ row: 0, emptyColumns: 4 }]);
   });
 
-  for (const ws of WORKSPACES) {
+  for (const page of PAGES) {
     for (const width of [1393, 1053, 913, 773, 343]) {
-      it(`${ws.id} packs into full rows at canvas width ${width}`, () => {
-        const tokens = [...KPIS, ...ws.blocks.map((b) => b.size)];
-        expect(layoutWorkspace(tokens, width).holes).toEqual([]);
+      it(`${page.id} packs into full rows at canvas width ${width}`, () => {
+        expect(layoutWorkspace([...KPIS, page.size], width).holes).toEqual([]);
       });
     }
   }
+
+  it("gives each chart page a 688px box at full width", () => {
+    expect(layoutWorkspace([...KPIS, "page"], 1393).rects[6]).toEqual({ x: 0, y: 100, w: 1393, h: 688 });
+  });
 
   it("places an XL block under the KPI strip at full width", () => {
     const { rects } = layoutWorkspace([...KPIS, "XL"], 1393);

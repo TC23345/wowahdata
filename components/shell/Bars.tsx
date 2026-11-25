@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import Link from "next/link";
 import { ItemCombobox } from "@/components/ah/ItemCombobox";
 import type { ItemSummary } from "@/lib/items";
 import { EDITION_LABEL, ACTIVE_EDITION } from "@/lib/edition";
-import { WORKSPACES, type WorkspaceDefinition, type WorkspaceId } from "@/lib/workspaces";
+import { PAGES, SCOPE_LABEL, type PageDefinition, type PageId, type Scope } from "@/lib/pages";
 import { Popover } from "./Popover";
 import { Segmented } from "./Segmented";
 
@@ -56,7 +57,7 @@ export function ScopeBar({ realms, activeRealm, onSwitchRealm, tz, onTz, status,
           onChange={() => {}}
           options={[
             { value: "classic-anniversary", label: EDITION_LABEL["classic-anniversary"] },
-            { value: "forever", label: EDITION_LABEL.forever, disabled: true },
+            { value: "forever", label: EDITION_LABEL.forever, disabled: true, reason: "Forever datasets arrive with the edition profile: the import needs a real Forever TSM export first." },
           ]}
         />
       </span>
@@ -129,7 +130,8 @@ export function ScopeBar({ realms, activeRealm, onSwitchRealm, tz, onTz, status,
 export type RangePreset = "week" | "7" | "30" | "90" | "all" | "custom";
 
 type ContextProps = {
-  workspace: WorkspaceDefinition;
+  page: PageDefinition;
+  scope: Scope;
   items: ItemSummary[];
   pinned: string[];
   item: string;
@@ -155,16 +157,31 @@ const QUICK_SLOT = 132;
 const QUICK_GAP = 8;
 
 export function ContextBar(props: ContextProps) {
-  const { workspace, items, pinned, item, onItem, preset, onPreset, ready } = props;
-  const subjectDisabled = !ready || workspace.subject !== "item";
-  const placeholder = workspace.subject === "pipeline" ? "All conversions" : workspace.subject === "none" ? "All items" : "";
+  const { page, scope, items, pinned, item, onItem, preset, onPreset, ready } = props;
+  const subjectDisabled = !ready || scope !== "item";
+  const placeholder = SCOPE_LABEL[scope];
+  const reason = !ready
+    ? "Load data first, from Manage data."
+    : scope === "item"
+      ? undefined
+      : page.scopes.includes("item")
+        ? `This page is showing ${SCOPE_LABEL[scope]}. Switch its scope to "This item" to pick one.`
+        : `The ${page.label} page covers ${SCOPE_LABEL[scope].toLowerCase()}, so there is no item to pick here.`;
 
   const combobox = (
-    <ItemCombobox items={items} pinned={pinned} value={item} onChange={onItem} disabled={subjectDisabled} placeholder={ready ? placeholder : "No data loaded"} />
+    <ItemCombobox
+      items={items}
+      pinned={pinned}
+      value={item}
+      onChange={onItem}
+      disabled={subjectDisabled}
+      disabledReason={reason}
+      placeholder={ready ? placeholder : "No data loaded"}
+    />
   );
   const range = (
     <>
-      <Segmented label="Range" value={preset === "custom" ? null : preset} onChange={onPreset} options={PRESETS} disabled={!ready} />
+      <Segmented label="Range" value={preset === "custom" ? null : preset} onChange={onPreset} options={PRESETS} disabled={!ready} disabledReason="Load data first, from Manage data." />
       <CustomRange {...props} />
     </>
   );
@@ -174,7 +191,7 @@ export function ContextBar(props: ContextProps) {
       {/* wide: one line */}
       <div className="only-wide flex min-w-0 flex-1 items-center gap-2">
         {combobox}
-        <QuickRow pinned={pinned} item={item} onItem={onItem} disabled={subjectDisabled} />
+        <QuickRow pinned={pinned} item={item} onItem={onItem} disabled={subjectDisabled} reason={reason} />
         <span className="h-6 w-px flex-none bg-[#333]" />
         {range}
         <span className="hide-below-1272 w-[184px] flex-none truncate text-right text-xs text-[#999]">{props.rangeLabel}</span>
@@ -191,7 +208,7 @@ export function ContextBar(props: ContextProps) {
   );
 }
 
-function QuickRow({ pinned, item, onItem, disabled }: { pinned: string[]; item: string; onItem: (n: string) => void; disabled: boolean }) {
+function QuickRow({ pinned, item, onItem, disabled, reason }: { pinned: string[]; item: string; onItem: (n: string) => void; disabled: boolean; reason?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const [count, setCount] = useState(0);
   useEffect(() => {
@@ -204,7 +221,7 @@ function QuickRow({ pinned, item, onItem, disabled }: { pinned: string[]; item: 
     return () => ro.disconnect();
   }, []);
   return (
-    <div ref={ref} className="flex min-w-0 flex-1 gap-2 overflow-hidden" aria-label="Pinned items">
+    <div ref={ref} className="flex min-w-0 flex-1 gap-2 overflow-hidden" aria-label="Pinned items" title={disabled ? reason : undefined}>
       {pinned.slice(0, count).map((name) => {
         const on = name === item && !disabled;
         return (
@@ -322,30 +339,37 @@ function NarrowRange(props: ContextProps) {
   );
 }
 
-// ── C: workspace nav ─────────────────────────────────────────────────────────
+// ── C: page tabs ─────────────────────────────────────────────────────────────
 
-export function WorkspaceNav({ active, onChange }: { active: WorkspaceId; onChange: (id: WorkspaceId) => void }) {
-  const current = WORKSPACES.find((w) => w.id === active)!;
+/**
+ * One tab per chart. Tabs are real links that carry the current query (item,
+ * range, zone), so a page can be opened in a new tab or shared. The row
+ * scrolls sideways when it is narrower than the tabs; its height never changes.
+ */
+export function PageNav({ active, hrefFor }: { active: PageId; hrefFor: (id: PageId) => string }) {
+  const current = PAGES.find((p) => p.id === active)!;
   return (
-    <nav className="bar bar-c" data-region="workspace-nav" aria-label="Workspaces">
-      {WORKSPACES.map((w) => {
-        const on = w.id === active;
-        return (
-          <button
-            key={w.id}
-            type="button"
-            aria-current={on ? "page" : undefined}
-            onClick={() => onChange(w.id)}
-            className={`flex-none rounded-t-md border-b-2 px-4 text-[13px] font-semibold ${
-              on ? "border-[#5dcaa5] bg-[#252525] text-[#e0e0e0]" : "border-transparent text-[#999] hover:text-[#e0e0e0]"
-            }`}
-          >
-            {w.label}
-          </button>
-        );
-      })}
+    <nav className="bar bar-c" data-region="workspace-nav" aria-label="Charts">
+      <div className="flex min-w-0 flex-none items-stretch gap-1 overflow-x-auto [scrollbar-width:none]">
+        {PAGES.map((p) => {
+          const on = p.id === active;
+          return (
+            <Link
+              key={p.id}
+              href={hrefFor(p.id)}
+              scroll={false}
+              aria-current={on ? "page" : undefined}
+              className={`flex flex-none items-center rounded-t-md border-b-2 px-3.5 text-[13px] font-semibold ${
+                on ? "border-[#5dcaa5] bg-[#252525] text-[#e0e0e0]" : "border-transparent text-[#999] hover:text-[#e0e0e0]"
+              }`}
+            >
+              {p.label}
+            </Link>
+          );
+        })}
+      </div>
       <div className="min-w-0 flex-1" />
-      <span className="not-narrow self-center truncate text-xs text-[#999]">{current.question}</span>
+      <span className="only-wide self-center truncate text-xs text-[#999]">{current.question}</span>
     </nav>
   );
 }

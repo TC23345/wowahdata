@@ -15,11 +15,13 @@ type Props = {
   value: string;
   onChange: (name: string) => void;
   disabled?: boolean;
-  /** Shown instead of the item when the workspace has no single subject. */
+  /** Why it is disabled, shown on hover. */
+  disabledReason?: string;
+  /** Shown instead of the item when the page has no single subject. */
   placeholder?: string;
 };
 
-export function ItemCombobox({ items, pinned, value, onChange, disabled, placeholder }: Props) {
+export function ItemCombobox({ items, pinned, value, onChange, disabled, disabledReason, placeholder }: Props) {
   const anchorRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
@@ -50,7 +52,7 @@ export function ItemCombobox({ items, pinned, value, onChange, disabled, placeho
   };
 
   return (
-    <div ref={anchorRef} className="relative h-8 w-[260px] flex-none">
+    <div ref={anchorRef} className="relative h-8 w-[260px] flex-none" title={disabled ? disabledReason : open ? undefined : value}>
       <input
         ref={inputRef}
         type="text"

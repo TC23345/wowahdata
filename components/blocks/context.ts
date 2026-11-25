@@ -15,13 +15,15 @@ import {
   type TradeSet,
 } from "@/lib/insights";
 import { filterForItem, type ItemFilteredData } from "@/lib/transform";
-import type { WorkspaceDefinition } from "@/lib/workspaces";
+import type { PageDefinition, Scope } from "@/lib/pages";
 import { LISTING_HOURS } from "@/lib/edition";
 
 /** Everything a block may read. Blocks receive this and nothing else. */
 export type BlockCtx = {
   data: LoadedData;
-  workspace: WorkspaceDefinition;
+  page: PageDefinition;
+  /** What the page's numbers are about; the chart and KPI strip both follow it. */
+  scope: Scope;
   item: string;
   range: DateRange;
   axis: BucketAxis;
@@ -30,7 +32,7 @@ export type BlockCtx = {
   itemSet: ItemFilteredData;
   /** Every item, in range. */
   rangeSet: TradeSet & { income: CashFlowRow[]; expenses: CashFlowRow[] };
-  /** The workspace's scope in range: the active item on Item, pipeline members on Pipeline, all items on Portfolio. */
+  /** The scope's trades in range: the active item, pipeline members, or every item. */
   scopeSet: TradeSet;
   ledger: LedgerRow[];
   scopeLedger: LedgerRow[];
@@ -39,6 +41,9 @@ export type BlockCtx = {
   ownChars: Set<string>;
   listingHours: number[];
   selectItem: (name: string) => void;
+  /** Items the user pinned (per dataset), and the toggle the Items table uses. */
+  pins: string[];
+  togglePin: (name: string) => void;
 };
 
 function inRange<T extends { time: number }>(rows: T[], range: DateRange): T[] {
@@ -57,13 +62,16 @@ export function deriveDataset(data: LoadedData): DatasetDerived {
 export function buildBlockContext(args: {
   data: LoadedData;
   derived: DatasetDerived;
-  workspace: WorkspaceDefinition;
+  page: PageDefinition;
+  scope: Scope;
   item: string;
   range: DateRange;
   tz: HeatmapTz;
   selectItem: (name: string) => void;
+  pins: string[];
+  togglePin: (name: string) => void;
 }): BlockCtx {
-  const { data, derived, workspace, item, range, tz, selectItem } = args;
+  const { data, derived, page, scope, item, range, tz, selectItem, pins, togglePin } = args;
   const rangeSet = {
     purchases: inRange(data.purchases, range),
     sales: inRange(data.sales, range),
@@ -76,9 +84,9 @@ export function buildBlockContext(args: {
   const member = (r: { itemName: string }) => (derived.roles.get(displayName(r)) ?? "flip") !== "flip";
   const itemSet = filterForItem(data, item, range);
   const scopeSet: TradeSet =
-    workspace.id === "item"
+    scope === "item"
       ? itemSet
-      : workspace.id === "pipeline"
+      : scope === "pipeline"
       ? {
           purchases: rangeSet.purchases.filter(member),
           sales: rangeSet.sales.filter(member),
@@ -88,7 +96,8 @@ export function buildBlockContext(args: {
       : rangeSet;
   return {
     data,
-    workspace,
+    page,
+    scope,
     item,
     range,
     axis: bucketAxis(range),
@@ -97,11 +106,13 @@ export function buildBlockContext(args: {
     rangeSet,
     scopeSet,
     ledger,
-    scopeLedger: workspace.id === "pipeline" ? ledger.filter((r) => r.role !== "flip") : ledger,
+    scopeLedger: scope === "pipeline" ? ledger.filter((r) => r.role !== "flip") : ledger,
     pipeline: allConversions(ledger),
     roles: derived.roles,
     ownChars: derived.ownChars,
     listingHours: LISTING_HOURS,
     selectItem,
+    pins,
+    togglePin,
   };
 }

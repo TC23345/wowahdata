@@ -1,7 +1,7 @@
 "use client";
 
 import type { ComponentType } from "react";
-import type { BlockId, ViewId } from "@/lib/workspaces";
+import type { BlockId, ViewId } from "@/lib/pages";
 import {
   OutcomesItemView,
   OutcomesTimeView,
@@ -35,7 +35,7 @@ export type PrimaryChartDefinition = {
 };
 
 /**
- * The seven primary charts. A chart's size comes from where a workspace places
+ * The seven primary charts. A chart's size comes from the page that places
  * it; its title, zones and views come from here. Adding breadth means adding a
  * view to a chart, which costs no layout.
  */

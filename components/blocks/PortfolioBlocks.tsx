@@ -17,7 +17,7 @@ ensureChartsRegistered();
 const SUNKEN = "var(--surface-sunken)";
 
 function scopeName(ctx: ViewProps["ctx"]): string {
-  return ctx.workspace.id === "item" ? ctx.item : ctx.workspace.id === "pipeline" ? "All conversions" : "All items";
+  return ctx.scope === "item" ? ctx.item : ctx.scope === "pipeline" ? "All conversions" : "All items";
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -357,21 +357,47 @@ export function ItemsTableView({ slot, ctx, stale, viewSwitch, title }: ViewProp
   }, [ctx.ledger, role, filter]);
   const k80 = useMemo(() => itemsForShare(ctx.ledger, 0.8), [ctx.ledger]);
 
+  const pinned = new Set(ctx.pins);
   const columns: Column<LedgerRow>[] = [
-    { id: "name", header: "Item", fill: 2.4, minWidth: 200, sortValue: (r) => r.name, render: (r) => r.name },
+    {
+      id: "pin",
+      header: "",
+      width: 34,
+      padLeft: 6,
+      padRight: 0,
+      render: (r) => {
+        const on = pinned.has(r.name);
+        return (
+          <button
+            type="button"
+            aria-pressed={on}
+            aria-label={on ? `Unpin ${r.name}` : `Pin ${r.name}`}
+            title={on ? "Pinned: shown in the quick row. Click to unpin." : "Pin to the quick row (or right-click the row)."}
+            onClick={(e) => {
+              e.stopPropagation();
+              ctx.togglePin(r.name);
+            }}
+            className={`text-sm leading-none ${on ? "text-[#ffd100]" : "text-[#555] hover:text-[#999]"}`}
+          >
+            {on ? "★" : "☆"}
+          </button>
+        );
+      },
+    },
+    { id: "name", header: "Item", fill: 2.4, minWidth: 200, sortValue: (r) => r.name, titleOf: (r) => r.name, render: (r) => r.name },
     { id: "role", header: "Role", width: 72, sortValue: (r) => r.role, render: (r) => <span className="text-[#999]">{r.role}</span> },
     { id: "sold", header: "Sold", width: 84, align: "right", sortValue: (r) => r.soldUnits, render: (r) => units(r.soldUnits) },
-    { id: "revenue", header: "Revenue", width: 120, align: "right", sortValue: (r) => r.revenue, render: (r) => <Money copper={r.revenue} /> },
+    { id: "revenue", header: "Revenue", width: 128, align: "right", sortValue: (r) => r.revenue, render: (r) => <Money copper={r.revenue} align /> },
     { id: "share", header: "Share", width: 72, align: "right", sortValue: (r) => r.revenue, render: (r) => <span className="text-[#999]">{pct(totalRevenue ? r.revenue / totalRevenue : 0, 1)}</span> },
     { id: "bought", header: "Bought", width: 84, align: "right", sortValue: (r) => r.boughtUnits, render: (r) => (r.boughtUnits ? units(r.boughtUnits) : "—") },
-    { id: "spend", header: "Spend", width: 120, align: "right", sortValue: (r) => r.spend, render: (r) => (r.spend ? <Money copper={r.spend} /> : "—") },
+    { id: "spend", header: "Spend", width: 128, align: "right", sortValue: (r) => r.spend, render: (r) => (r.spend ? <Money copper={r.spend} align /> : "—") },
     {
       id: "avg",
       header: "Avg sell",
       width: 110,
       align: "right",
       sortValue: (r) => (r.soldUnits ? r.revenue / r.soldUnits : 0),
-      render: (r) => (r.soldUnits ? <Money copper={Math.round(r.revenue / r.soldUnits)} /> : "—"),
+      render: (r) => (r.soldUnits ? <Money copper={Math.round(r.revenue / r.soldUnits)} align /> : "—"),
     },
     {
       id: "success",
@@ -427,7 +453,7 @@ export function ItemsTableView({ slot, ctx, stale, viewSwitch, title }: ViewProp
               { label: "Last seen", value: dateLabel(hover.lastSeen) },
             ]
           : null,
-        idle: "Click a row to make it the active item. Roles are computed over all time.",
+        idle: "Click a row to make it the active item; ☆ or right-click pins it to the quick row. Click two headers to sort by one, then the other.",
       }}
       footer={<span>{rows.length === ctx.ledger.length ? `${units(rows.length)} items · auction rows only` : `${units(rows.length)} of ${units(ctx.ledger.length)} items shown`}</span>}
     >
@@ -440,10 +466,12 @@ export function ItemsTableView({ slot, ctx, stale, viewSwitch, title }: ViewProp
             rows={rows}
             columns={columns}
             rowKey={(r) => r.name}
-            initialSort={{ id: "revenue", dir: "desc" }}
+            initialSort={[{ id: "revenue", dir: "desc" }]}
+            storageKey="items-table"
             selectedKey={ctx.item}
             onSelect={(r) => ctx.selectItem(r.name)}
             onHover={setHover}
+            onRowContextMenu={(r) => ctx.togglePin(r.name)}
           />
         )}
       </div>

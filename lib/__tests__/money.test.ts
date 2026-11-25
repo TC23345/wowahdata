@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { axisUnitFor, formatMoney, moneyParts } from "../money";
+import { axisUnitFor, formatMoney, formatMoneyExact, moneyParts } from "../money";
 
 describe("formatMoney", () => {
   it("shows copper only under one silver", () => {
@@ -37,5 +37,14 @@ describe("axisUnitFor", () => {
     expect(axisUnitFor(240_000).unit).toBe("g");
     expect(axisUnitFor(1_800).unit).toBe("s");
     expect(axisUnitFor(60).unit).toBe("c");
+  });
+});
+
+describe("formatMoneyExact", () => {
+  it("shows every non-zero denomination", () => {
+    expect(formatMoneyExact(12_345_678)).toBe("1,234g 56s 78c");
+    expect(formatMoneyExact(10_001)).toBe("1g 1c");
+    expect(formatMoneyExact(0)).toBe("0c");
+    expect(formatMoneyExact(-500)).toBe("\u22125s");
   });
 });

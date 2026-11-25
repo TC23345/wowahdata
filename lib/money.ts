@@ -72,6 +72,16 @@ export function formatMoney(copper: number, sign: SignMode = "auto"): string {
   return moneySign(copper, sign) + body;
 }
 
+/** Every non-zero denomination, for hover text: "1,234g 56s 78c". */
+export function formatMoneyExact(copper: number): string {
+  const c = Math.round(Math.abs(copper));
+  const g = Math.floor(c / COPPER_PER_GOLD);
+  const s = Math.floor((c % COPPER_PER_GOLD) / COPPER_PER_SILVER);
+  const cc = c % COPPER_PER_SILVER;
+  const parts = [g ? `${withSeparators(g)}g` : "", s ? `${s}s` : "", cc || c === 0 ? `${cc}c` : ""].filter(Boolean);
+  return moneySign(copper) + parts.join(" ");
+}
+
 /** Axis tick value and the unit to name in the axis title, chosen per axis. */
 export function axisUnitFor(maxCopper: number): { unit: "g" | "s" | "c"; divisor: number } {
   if (maxCopper >= COPPER_PER_GOLD) return { unit: "g", divisor: COPPER_PER_GOLD };

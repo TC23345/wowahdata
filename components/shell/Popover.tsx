@@ -32,8 +32,20 @@ export function Popover({ open, onClose, anchorRef, width, align = "start", labe
     left = Math.max(8, Math.min(left, vw - w - 8));
     el.style.width = `${w}px`;
     el.style.left = `${left}px`;
-    el.style.top = `${r.bottom + 4}px`;
-    el.style.maxHeight = `${Math.max(160, window.innerHeight - r.bottom - 16)}px`;
+    // Open below the trigger; flip above when the content doesn't fit below and
+    // there is more room above, so the panel never covers its own trigger.
+    const below = window.innerHeight - r.bottom - 12;
+    const above = r.top - 12;
+    el.style.maxHeight = "none";
+    const natural = el.scrollHeight;
+    if (natural > below && above > below) {
+      const h = Math.min(natural, above);
+      el.style.maxHeight = `${h}px`;
+      el.style.top = `${r.top - 4 - h}px`;
+    } else {
+      el.style.maxHeight = `${Math.max(120, below)}px`;
+      el.style.top = `${r.bottom + 4}px`;
+    }
   }, [anchorRef, width, align]);
 
   useLayoutEffect(() => {

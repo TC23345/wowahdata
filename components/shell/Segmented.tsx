@@ -1,6 +1,6 @@
 "use client";
 
-type Option<T extends string> = { value: T; label: string; disabled?: boolean };
+type Option<T extends string> = { value: T; label: string; disabled?: boolean; /** Why it is disabled, shown on hover. */ reason?: string };
 
 type Props<T extends string> = {
   options: Option<T>[];
@@ -11,14 +11,17 @@ type Props<T extends string> = {
   className?: string;
   /** "view" marks a view switcher: it changes what the block shows, not how. */
   variant?: "option" | "view";
+  /** Why the whole control is disabled, shown on hover. */
+  disabledReason?: string;
 };
 
 /** A single-line segmented control. Fixed height; never wraps. */
-export function Segmented<T extends string>({ options, value, onChange, label, disabled, className, variant = "option" }: Props<T>) {
+export function Segmented<T extends string>({ options, value, onChange, label, disabled, className, variant = "option", disabledReason }: Props<T>) {
   return (
     <div
       role="radiogroup"
       aria-label={label}
+      title={disabled ? disabledReason : undefined}
       className={`inline-flex h-7 flex-none items-center rounded-md border border-[#333] bg-[#1a1a1a] p-0.5 ${
         disabled ? "opacity-50" : ""
       } ${className ?? ""}`}
@@ -26,8 +29,8 @@ export function Segmented<T extends string>({ options, value, onChange, label, d
       {options.map((o) => {
         const on = o.value === value;
         return (
+          <span key={o.value} className="inline-flex" title={o.disabled ? o.reason : undefined}>
           <button
-            key={o.value}
             type="button"
             role="radio"
             aria-checked={on}
@@ -43,6 +46,7 @@ export function Segmented<T extends string>({ options, value, onChange, label, d
           >
             {o.label}
           </button>
+          </span>
         );
       })}
     </div>

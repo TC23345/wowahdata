@@ -6,7 +6,8 @@
 // numbers; app/globals.css implements the same table in CSS, and
 // layoutWorkspace() lets tests and the geometry check predict every block rect.
 
-export type SizeToken = "kpi" | "S" | "M" | "L" | "XL";
+/** `page` is one chart filling its own page: full width, the tallest box. */
+export type SizeToken = "kpi" | "S" | "M" | "L" | "XL" | "page";
 export type Arrangement = "wide" | "medium" | "narrow";
 
 export const GAP = 12;
@@ -24,6 +25,7 @@ export const ARRANGEMENTS: Record<
       M: { cols: 6, rows: 4 },
       L: { cols: 12, rows: 4 },
       XL: { cols: 12, rows: 6 },
+      page: { cols: 12, rows: 7 },
     },
   },
   medium: {
@@ -35,6 +37,7 @@ export const ARRANGEMENTS: Record<
       M: { cols: 6, rows: 4 },
       L: { cols: 6, rows: 4 },
       XL: { cols: 6, rows: 6 },
+      page: { cols: 6, rows: 7 },
     },
   },
   narrow: {
@@ -46,6 +49,7 @@ export const ARRANGEMENTS: Record<
       M: { cols: 2, rows: 4 },
       L: { cols: 2, rows: 4 },
       XL: { cols: 2, rows: 5 },
+      page: { cols: 2, rows: 6 },
     },
   },
 };

@@ -161,6 +161,19 @@ matrix.
 
 ### Status
 
+**Revision, one chart per page.** Each of the seven charts below is now its own
+route (`/timing` … `/costs`) with the KPI strip above one `page`-sized box
+(12 columns × 7 rows, 688px at full width). The dashboard lives in a layout
+shared by those routes, so data, scroll and item carry across pages without a
+reload. Outcomes and Flow gain a scope switch (this item, all conversions, all
+items) and the KPI strip follows the scope. From the comparison with
+Blizzard's Forever interface source, also adopted: views remembered per page,
+a two-key sort remembered per table, disabled controls that explain
+themselves, money aligned by denomination in tables with the exact value on
+hover, user pins (☆ or right-click, per dataset, capped at 20) feeding the
+quick row, and popovers that flip upward when there is no room below. The
+geometry check covers every page, view and scope: 241 of 241 checks pass.
+
 **Revision, primary charts.** The twelve blocks of `05-block-catalog.md` are
 consolidated into seven primary charts, each with a view switcher. Breadth
 comes from views rather than more boxes, and a view change is a body swap

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { nextSort, readPref, writePref, type SortKey } from "@/lib/prefs";
 
 // A results table modelled on the WoW: Forever auction house browse list.
 // The client builds every list from the same parts: each column is either a
@@ -14,6 +15,9 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 //   (layout law 6 — 4 rows and 4,000 rows are the same height)
 // - rows are virtualised, so a 1,224-item catalogue costs ~20 rendered rows
 // - sorting and filtering change rows, never column widths
+// - sorting is two-key like the auction house: clicking a column makes it the
+//   primary key and keeps the previous primary as the tie-breaker; the arrow
+//   shows on the primary only; the sort is remembered per table (storageKey)
 
 export type Column<R> = {
   id: string;
@@ -28,19 +32,25 @@ export type Column<R> = {
   padRight?: number;
   /** Present when the column can be sorted. */
   sortValue?: (row: R) => number | string;
+  /** Full text shown on hover, for cells that may truncate. */
+  titleOf?: (row: R) => string;
   render: (row: R) => ReactNode;
 };
 
-export type SortState = { id: string; dir: "asc" | "desc" };
+export type SortState = SortKey;
 
 type Props<R> = {
   rows: R[];
   columns: Column<R>[];
   rowKey: (row: R) => string;
-  initialSort?: SortState;
+  initialSort?: SortState[];
+  /** Remember the sort under this key across sessions. */
+  storageKey?: string;
   selectedKey?: string | null;
   onSelect?: (row: R) => void;
   onHover?: (row: R | null) => void;
+  /** Right-click on a row (the auction house uses it to favourite). */
+  onRowContextMenu?: (row: R) => void;
   label: string;
 };
 
@@ -49,8 +59,15 @@ const HEADER_HEIGHT = 28;
 const OVERSCAN = 6;
 const STANDARD_PADDING = 10;
 
-export function AuctionTable<R>({ rows, columns, rowKey, initialSort, selectedKey, onSelect, onHover, label }: Props<R>) {
-  const [sort, setSort] = useState<SortState | null>(initialSort ?? null);
+export function AuctionTable<R>({ rows, columns, rowKey, initialSort, storageKey, selectedKey, onSelect, onHover, onRowContextMenu, label }: Props<R>) {
+  const [sort, setSort] = useState<SortKey[]>(() => {
+    const fallback = initialSort ?? [];
+    if (!storageKey) return fallback;
+    const saved = readPref<SortKey[]>(`sort:${storageKey}`, fallback);
+    // Drop keys for columns that no longer exist.
+    const valid = saved.filter((k) => columns.some((c) => c.id === k.id && c.sortValue));
+    return valid.length ? valid : fallback;
+  });
   const scrollRef = useRef<HTMLDivElement>(null);
   const [view, setView] = useState({ top: 0, height: 400 });
 
@@ -63,16 +80,18 @@ export function AuctionTable<R>({ rows, columns, rowKey, initialSort, selectedKe
   }, []);
 
   const sorted = useMemo(() => {
-    if (!sort) return rows;
-    const col = columns.find((c) => c.id === sort.id);
-    if (!col?.sortValue) return rows;
-    const get = col.sortValue;
-    const mul = sort.dir === "asc" ? 1 : -1;
+    const keys = sort
+      .map((k) => ({ get: columns.find((c) => c.id === k.id)?.sortValue, mul: k.dir === "asc" ? 1 : -1 }))
+      .filter((k): k is { get: (row: R) => number | string; mul: number } => Boolean(k.get));
+    if (keys.length === 0) return rows;
     return [...rows].sort((a, b) => {
-      const va = get(a);
-      const vb = get(b);
-      if (typeof va === "string" || typeof vb === "string") return mul * String(va).localeCompare(String(vb));
-      return mul * (va - vb);
+      for (const { get, mul } of keys) {
+        const va = get(a);
+        const vb = get(b);
+        const d = typeof va === "string" || typeof vb === "string" ? String(va).localeCompare(String(vb)) : va - vb;
+        if (d !== 0) return mul * d;
+      }
+      return 0;
     });
   }, [rows, columns, sort]);
 
@@ -86,7 +105,11 @@ export function AuctionTable<R>({ rows, columns, rowKey, initialSort, selectedKe
 
   const onHeader = (c: Column<R>) => {
     if (!c.sortValue) return;
-    setSort((s) => (s?.id === c.id ? { id: c.id, dir: s.dir === "desc" ? "asc" : "desc" } : { id: c.id, dir: "desc" }));
+    setSort((s) => {
+      const next = nextSort(s, c.id);
+      if (storageKey) writePref(`sort:${storageKey}`, next);
+      return next;
+    });
   };
 
   const cellPad = (c: Column<R>) => ({
@@ -116,18 +139,20 @@ export function AuctionTable<R>({ rows, columns, rowKey, initialSort, selectedKe
           style={{ gridTemplateColumns: template, height: HEADER_HEIGHT }}
         >
           {columns.map((c) => {
-            const active = sort?.id === c.id;
+            const active = sort[0]?.id === c.id;
+            const tieBreak = sort[1]?.id === c.id;
             return (
-              <div key={c.id} role="columnheader" aria-sort={active ? (sort!.dir === "asc" ? "ascending" : "descending") : "none"} style={cellPad(c)}>
+              <div key={c.id} role="columnheader" aria-sort={active ? (sort[0].dir === "asc" ? "ascending" : "descending") : "none"} style={cellPad(c)}>
                 {c.sortValue ? (
                   <button
                     type="button"
                     onClick={() => onHeader(c)}
                     className={`w-full truncate uppercase tracking-wide ${active ? "text-[#e0e0e0]" : "hover:text-[#e0e0e0]"}`}
                     style={{ textAlign: c.align ?? "left" }}
+                    title={active ? "Primary sort. Click to reverse." : tieBreak ? "Tie-breaker sort. Click to make it primary." : "Click to sort by this column."}
                   >
                     {c.header}
-                    <span className="inline-block w-3">{active ? (sort!.dir === "desc" ? "↓" : "↑") : ""}</span>
+                    <span className="inline-block w-3">{active ? (sort[0].dir === "desc" ? "↓" : "↑") : ""}</span>
                   </button>
                 ) : (
                   <span className="block truncate">{c.header}</span>
@@ -156,13 +181,18 @@ export function AuctionTable<R>({ rows, columns, rowKey, initialSort, selectedKe
                 }}
                 onMouseEnter={() => onHover?.(row)}
                 onFocus={() => onHover?.(row)}
+                onContextMenu={(e) => {
+                  if (!onRowContextMenu) return;
+                  e.preventDefault();
+                  onRowContextMenu(row);
+                }}
                 className={`absolute left-0 right-0 grid cursor-pointer items-center border-t border-[#2e2e2e] text-xs outline-none hover:bg-[#2c2c2c] focus-visible:bg-[#2c2c2c] ${
                   selected ? "bg-[#1f2a26] text-[#e0e0e0]" : "text-[#e0e0e0]"
                 }`}
                 style={{ gridTemplateColumns: template, height: ROW_HEIGHT, top: (first + i) * ROW_HEIGHT }}
               >
                 {columns.map((c) => (
-                  <div key={c.id} role="gridcell" className="truncate" style={cellPad(c)}>
+                  <div key={c.id} role="gridcell" className="truncate" style={cellPad(c)} title={c.titleOf?.(row)}>
                     {c.render(row)}
                   </div>
                 ))}

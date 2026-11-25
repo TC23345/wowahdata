@@ -66,7 +66,11 @@ export function BlockShell({ slot, title, chrome, status, summary, stale, caveat
       {chrome.toolbar && (
         <div className="block-toolbar">
           {toolbarLead}
-          <fieldset disabled={!live} className={`flex min-w-0 items-center gap-2 ${live ? "" : "opacity-50"}`}>
+          <fieldset
+            disabled={!live}
+            title={live ? undefined : `Options are off: ${"message" in status ? status.message : "loading"}`}
+            className={`flex min-w-0 items-center gap-2 ${live ? "" : "opacity-50"}`}
+          >
             {toolbar}
           </fieldset>
         </div>
