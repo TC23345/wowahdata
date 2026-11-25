@@ -227,7 +227,7 @@ function ItemSearchInput({
       )}
       {open && query.trim() && results.length === 0 && (
         <div className="absolute right-0 z-20 mt-2 w-72 rounded-md border border-[#333] bg-[#1a1a1a] px-3 py-3 text-center text-xs text-[#666] shadow-xl">
-          No items match "{query}".
+          No items match &ldquo;{query}&rdquo;.
         </div>
       )}
     </div>

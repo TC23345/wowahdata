@@ -20,8 +20,14 @@ function str(v: unknown): string {
   return typeof v === "string" ? v : v == null ? "" : String(v);
 }
 
+// TSM desktop app exports start with a UTF-8 byte-order mark. Strip it so the
+// first header is "itemString"/"type", not "\uFEFFitemString".
+export function stripBom(input: string): string {
+  return input.charCodeAt(0) === 0xfeff ? input.slice(1) : input;
+}
+
 function parseCsv<T>(input: string): T[] {
-  const r = Papa.parse<Record<string, unknown>>(input, {
+  const r = Papa.parse<Record<string, unknown>>(stripBom(input), {
     header: true,
     skipEmptyLines: true,
   });

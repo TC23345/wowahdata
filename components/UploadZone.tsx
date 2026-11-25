@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { realmFromFilename } from "@/lib/realm";
+import { ACCEPTED_FILENAME_PATTERNS, realmFromFilename } from "@/lib/realm";
 import { loadFromDroppedFiles, loadSampleData } from "@/lib/client-load";
 import type { LoadedData } from "@/lib/csv";
 
@@ -21,7 +21,7 @@ export function UploadZone({ onLoaded }: Props) {
       const valid = files.filter((f) => realmFromFilename(f.name));
       if (valid.length === 0) {
         setError(
-          "Drop one or more files matching Accounting_<Realm>_<kind>.csv",
+          `Drop one or more files matching ${ACCEPTED_FILENAME_PATTERNS.join(" or ")}`,
         );
         return;
       }
@@ -77,7 +77,9 @@ export function UploadZone({ onLoaded }: Props) {
           Drop your TSM CSV exports here
         </p>
         <p className="max-w-md text-xs text-[#999]">
-          Files matching <code className="rounded bg-[#252525] px-1 py-0.5 text-[10px] text-[#e0e0e0]">Accounting_&lt;Realm&gt;_&lt;kind&gt;.csv</code>.
+          Files matching <code className="rounded bg-[#252525] px-1 py-0.5 text-[10px] text-[#e0e0e0]">Accounting_&lt;Realm&gt;_&lt;kind&gt;.csv</code>{" "}
+          (TSM addon) or <code className="rounded bg-[#252525] px-1 py-0.5 text-[10px] text-[#e0e0e0]">TSM_&lt;Realm&gt;_&lt;Kind&gt;_&lt;YYYY-MM-DD&gt;.csv</code>{" "}
+          (TSM desktop Data Export).
           Any subset works. Your data never leaves your browser — parsed in-page,
           stored locally in IndexedDB.
         </p>

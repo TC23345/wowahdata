@@ -5,6 +5,7 @@ import {
   parseCashFlow,
   parseExpiredCanceled,
   parsePurchaseSale,
+  stripBom,
 } from "../parse";
 import { copperToGold } from "../csv";
 
@@ -76,5 +77,56 @@ describe("CSV parsing", () => {
   it("header-only income CSV parses to []", () => {
     const txt = "type,amount,otherPlayer,player,time\n";
     expect(parseCashFlow(txt)).toEqual([]);
+  });
+
+  describe("UTF-8 byte-order mark (TSM desktop Data Export)", () => {
+    const BOM = "\uFEFF";
+
+    it("stripBom removes only a single leading BOM", () => {
+      expect(stripBom(`${BOM}itemString,itemName`)).toBe("itemString,itemName");
+      expect(stripBom("itemString,itemName")).toBe("itemString,itemName");
+      expect(stripBom(`a${BOM}b`)).toBe(`a${BOM}b`);
+    });
+
+    it("parses a BOM-prefixed sales file with non-ASCII character names", () => {
+      const txt =
+        BOM +
+        "itemString,itemName,stackSize,quantity,price,otherPlayer,player,time,source\n" +
+        "i:22446,Greater Planar Essence,1,3,57807,Ånon,Clåude Code,1774928269,Auction\n";
+      const [row] = parsePurchaseSale(txt);
+      expect(row.itemString).toBe("i:22446");
+      expect(Object.keys(row)[0]).toBe("itemString");
+      expect(row.player).toBe("Clåude Code");
+      expect(row.otherPlayer).toBe("Ånon");
+      expect(row.time).toBe(1774928269);
+      // Price stays as exported: already net of the AH cut, copper per unit.
+      expect(row.price).toBe(57807);
+    });
+
+    it("parses a BOM-prefixed cancelled file", () => {
+      const txt =
+        BOM +
+        "itemString,itemName,stackSize,quantity,player,time\n" +
+        "i:22446,Greater Planar Essence,1,5,Clåude Code,1774928269\n";
+      const [row] = parseExpiredCanceled(txt);
+      expect(row).toEqual({
+        itemString: "i:22446",
+        itemName: "Greater Planar Essence",
+        stackSize: 1,
+        quantity: 5,
+        player: "Clåude Code",
+        time: 1774928269,
+      });
+    });
+
+    it("parses a BOM-prefixed income file (first column is `type`)", () => {
+      const txt =
+        BOM +
+        "type,amount,otherPlayer,player,time\n" +
+        "Money Transfer,1500000,Ånon,Clåude Code,1774928269\n";
+      const [row] = parseCashFlow(txt);
+      expect(row.type).toBe("Money Transfer");
+      expect(row.amount).toBe(1500000);
+    });
   });
 });

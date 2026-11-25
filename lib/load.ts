@@ -1,6 +1,6 @@
 import { type LoadedData, type TsmKind } from "./csv";
 import { buildLoadedData, parseByKind, type ParsedKindResult } from "./parse";
-import { realmFromFilename } from "./realm";
+import { ACCEPTED_FILENAME_PATTERNS, realmFromFilename } from "./realm";
 
 export type FileInput = { name: string; text: string };
 
@@ -22,7 +22,7 @@ export function loadFiles(files: FileInput[]): LoadResult {
     if (!meta) {
       return {
         ok: false,
-        error: `Unrecognized filename: ${f.name}. Expected Accounting_<Realm>_<kind>.csv`,
+        error: `Unrecognized filename: ${f.name}. Expected ${ACCEPTED_FILENAME_PATTERNS.join(" or ")}`,
       };
     }
     if (realm === null) realm = meta.realm;
