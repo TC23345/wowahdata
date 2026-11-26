@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { ACCEPTED_FILENAME_PATTERNS, realmFromFilename } from "@/lib/realm";
-import { loadFromDroppedFiles, loadSampleData } from "@/lib/client-load";
+import { ACCEPTED_FILENAME_PATTERN, realmFromFilename } from "@/lib/realm";
+import { loadFromDroppedFiles } from "@/lib/client-load";
 import type { LoadedData } from "@/lib/csv";
 
 type Props = {
@@ -12,7 +12,7 @@ type Props = {
 export function UploadZone({ onLoaded }: Props) {
   const [dragActive, setDragActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState<"idle" | "parsing" | "sample">("idle");
+  const [busy, setBusy] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFiles = useCallback(
@@ -21,13 +21,13 @@ export function UploadZone({ onLoaded }: Props) {
       const valid = files.filter((f) => realmFromFilename(f.name));
       if (valid.length === 0) {
         setError(
-          `Drop one or more files matching ${ACCEPTED_FILENAME_PATTERNS.join(" or ")}`,
+          `Drop one or more TSM desktop Data Export files named ${ACCEPTED_FILENAME_PATTERN}`,
         );
         return;
       }
-      setBusy("parsing");
+      setBusy(true);
       const result = await loadFromDroppedFiles(valid);
-      setBusy("idle");
+      setBusy(false);
       if (!result.ok) {
         setError(result.error);
         return;
@@ -36,23 +36,6 @@ export function UploadZone({ onLoaded }: Props) {
     },
     [onLoaded],
   );
-
-  const onSample = useCallback(async () => {
-    setError(null);
-    setBusy("sample");
-    try {
-      const r = await loadSampleData();
-      if (!r.ok) {
-        setError(r.error);
-        return;
-      }
-      onLoaded(r.data);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setBusy("idle");
-    }
-  }, [onLoaded]);
 
   return (
     <section className="flex flex-col gap-4">
@@ -74,13 +57,13 @@ export function UploadZone({ onLoaded }: Props) {
         }`}
       >
         <p className="text-base text-[#e0e0e0]">
-          Drop your TSM CSV exports here
+          Drop your TSM Forever export here
         </p>
         <p className="max-w-md text-xs text-[#999]">
-          Files matching <code className="rounded bg-[#252525] px-1 py-0.5 text-[10px] text-[#e0e0e0]">Accounting_&lt;Realm&gt;_&lt;kind&gt;.csv</code>{" "}
-          (TSM addon) or <code className="rounded bg-[#252525] px-1 py-0.5 text-[10px] text-[#e0e0e0]">TSM_&lt;Realm&gt;_&lt;Kind&gt;_&lt;YYYY-MM-DD&gt;.csv</code>{" "}
-          (TSM desktop Data Export).
-          Any subset works. Your data never leaves your browser — parsed in-page,
+          In the TSM desktop app, open Data Export, pick Game Mode
+          &ldquo;Forever&rdquo; and your realm, then unzip and drop the{" "}
+          <code className="rounded bg-[#252525] px-1 py-0.5 text-[10px] text-[#e0e0e0]">TSM_&lt;Realm&gt;_&lt;Kind&gt;_&lt;YYYY-MM-DD&gt;.csv</code>{" "}
+          files. Any subset works. Your data never leaves your browser — parsed in-page,
           stored locally in IndexedDB.
         </p>
         <input
@@ -104,20 +87,6 @@ export function UploadZone({ onLoaded }: Props) {
         </button>
       </label>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <button
-          type="button"
-          onClick={onSample}
-          disabled={busy !== "idle"}
-          className="rounded bg-[#5dcaa5] px-3 py-1.5 text-sm font-medium text-[#0a1814] hover:bg-[#7fdab8] disabled:opacity-50"
-        >
-          {busy === "sample" ? "Loading sample…" : "Load sample data"}
-        </button>
-        <p className="text-xs text-[#666]">
-          Uses a scrubbed Nightslayer export — Jan 21 to May 6, 2026 (8,510 sales rows).
-        </p>
-      </div>
-
       {error && (
         <p
           role="alert"
@@ -127,7 +96,7 @@ export function UploadZone({ onLoaded }: Props) {
         </p>
       )}
 
-      {busy === "parsing" && (
+      {busy && (
         <p className="text-xs text-[#999]">Parsing your TSM export…</p>
       )}
     </section>

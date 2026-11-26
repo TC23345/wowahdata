@@ -1,6 +1,6 @@
 import { type LoadedData, type TsmKind } from "./csv";
 import { buildLoadedData, parseByKind, type ParsedKindResult } from "./parse";
-import { ACCEPTED_FILENAME_PATTERNS, realmFromFilename } from "./realm";
+import { ACCEPTED_FILENAME_PATTERN, realmFromFilename } from "./realm";
 
 export type FileInput = { name: string; text: string };
 
@@ -8,7 +8,7 @@ export type LoadResult =
   | { ok: true; data: LoadedData }
   | { ok: false; error: string };
 
-// Take a set of TSM CSV files (any subset of the six kinds) and return one
+// Take a set of TSM desktop Data Export CSVs (any subset of the six kinds) and return one
 // LoadedData. Multiple realms are rejected — caller should split first.
 export function loadFiles(files: FileInput[]): LoadResult {
   if (files.length === 0) return { ok: false, error: "No files provided" };
@@ -22,7 +22,7 @@ export function loadFiles(files: FileInput[]): LoadResult {
     if (!meta) {
       return {
         ok: false,
-        error: `Unrecognized filename: ${f.name}. Expected ${ACCEPTED_FILENAME_PATTERNS.join(" or ")}`,
+        error: `Unrecognized filename: ${f.name}. Expected a TSM desktop Data Export file named ${ACCEPTED_FILENAME_PATTERN}`,
       };
     }
     if (realm === null) realm = meta.realm;

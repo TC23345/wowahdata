@@ -1,8 +1,8 @@
 # wowahdata
 
-A public, client-side dashboard for WoW auction-house traders. Drop your **TradeSkillMaster Accounting CSVs** in and see when your AH actually clears.
+A public, client-side dashboard for **WoW Forever** auction-house traders. Drop your **TradeSkillMaster desktop Data Export** in and see when your AH actually clears.
 
-**Your data never leaves your browser.** Parsing happens in-page with PapaParse, parsed rows persist to IndexedDB, and the only network request the app ever makes is loading its own JS and the optional sample dataset. Nothing posts anywhere.
+**Your data never leaves your browser.** Parsing happens in-page with PapaParse, parsed rows persist to IndexedDB, and the only network requests the app ever makes are for its own JS and CSS. Nothing posts anywhere.
 
 ## What you get
 
@@ -18,34 +18,35 @@ URL search params (`?item=`, `?range=`, `?start=`, `?end=`, `?tab=`) make every 
 
 ## Getting your data
 
-In TSM Accounting → Export → CSV. You'll get six files:
+wowahdata reads only the **TSM desktop app's Data Export** for Game Mode **Forever**. The in-game addon's `Accounting_<Realm>_<kind>.csv` files are not accepted.
 
-```
-Accounting_<Realm>_purchases.csv
-Accounting_<Realm>_sales.csv
-Accounting_<Realm>_expired.csv
-Accounting_<Realm>_canceled.csv
-Accounting_<Realm>_income.csv
-Accounting_<Realm>_expenses.csv
-```
+1. In the TSM desktop app, open **Data Export**.
+2. Choose Game Mode **Forever** and your realm, then export. TSM writes six files, often as a zip:
 
-Drop any subset into the upload zone. Realm is detected from the filename — multi-realm sessions are supported via a switcher.
+   ```
+   TSM_<Realm>_Sales_<YYYY-MM-DD>.csv
+   TSM_<Realm>_Buys_<YYYY-MM-DD>.csv
+   TSM_<Realm>_Cancelled_<YYYY-MM-DD>.csv
+   TSM_<Realm>_Expired_<YYYY-MM-DD>.csv
+   TSM_<Realm>_Income_<YYYY-MM-DD>.csv
+   TSM_<Realm>_Expense_<YYYY-MM-DD>.csv
+   ```
 
-## Sample data
+3. Unzip, then drop any subset into the upload zone. The realm comes from the filename; multiple realms are supported via a switcher, one realm per upload.
 
-Don't have a TSM export handy? Click **Load sample data** to load a scrubbed Nightslayer export covering Jan 21 → May 6, 2026 (~21k rows across all six files). Counterparty names are anonymized; the rest is genuine trading data.
+The files start with a UTF-8 byte-order mark, which the parser strips. The dashboard opens on whichever item sold the most units in your data.
 
 ## Local development
 
 ```bash
 npm install
 npm run dev      # http://localhost:3000
-npm test         # vitest, currently 37 cases
+npm test         # vitest
 npm run build    # production build (Turbopack)
 npm run typecheck
 ```
 
-The fixture under `__fixtures__/nightslayer/` is the test data. `scripts/scrub-fixtures.mjs` re-derives it from a real export if you need to refresh — it deterministically maps every counterparty name to `Anon<N>` so the fixtures can be committed.
+The test data in `__fixtures__/forever/` is a synthetic Forever Data Export (realm `PvP`, four Tue–Mon weeks ending 2026-11-23, BOM-prefixed like the real files). It is made up, not real trading data. `node scripts/make-forever-fixture.mjs` regenerates it deterministically.
 
 ## Stack
 

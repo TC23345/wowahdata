@@ -2,9 +2,9 @@ import { Suspense } from "react";
 import { Dashboard } from "@/components/Dashboard";
 
 export const metadata = {
-  title: "wowahdata — TSM accounting dashboard",
+  title: "wowahdata — TSM accounting dashboard for WoW Forever",
   description:
-    "Drop your TradeSkillMaster CSVs and see when your AH actually clears. Per-item sale heatmap, P&L, sell-through. Your data never leaves your browser.",
+    "Drop your TradeSkillMaster Forever Data Export and see when your AH actually clears. Per-item sale heatmap, P&L, sell-through. Your data never leaves your browser.",
 };
 
 export default function Home() {
@@ -20,7 +20,7 @@ export default function Home() {
           </span>
         </div>
         <p className="text-sm text-[#999]">
-          When does your AH actually clear? Drop your TSM Accounting CSVs to find out.{" "}
+          When does your AH actually clear? Drop your TSM Forever Data Export to find out.{" "}
           <span className="text-[#5dcaa5]">Your data never leaves your browser.</span>
         </p>
       </header>

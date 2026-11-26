@@ -1,45 +1,37 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CURATED_ITEMS } from "@/lib/curated";
 import type { ItemSummary } from "@/lib/items";
-import { searchItems } from "@/lib/items";
+import { searchItems, topItemChips } from "@/lib/items";
 
 const VISIBLE_CHIP_COUNT = 5;
 
 type Props = {
   items: ItemSummary[];
   value: string;
+  defaultItem: string | null;
   onChange: (next: string) => void;
 };
 
-export function ItemChips({ items, value, onChange }: Props) {
+export function ItemChips({ items, value, defaultItem, onChange }: Props) {
   const itemsByName = useMemo(() => {
     const m = new Map<string, ItemSummary>();
     for (const i of items) m.set(i.name, i);
     return m;
   }, [items]);
 
-  // Top N curated items that have activity in the loaded dataset, sorted by
-  // transaction count descending. Items with zero activity drop off — no
-  // point pinning a chip when there's no data behind it.
-  const visibleChips = useMemo(() => {
-    const curatedActive = CURATED_ITEMS
-      .map((name) => itemsByName.get(name))
-      .filter((i): i is ItemSummary => Boolean(i && i.txnCount > 0))
-      .sort((a, b) => b.txnCount - a.txnCount);
-    return curatedActive.slice(0, VISIBLE_CHIP_COUNT);
-  }, [itemsByName]);
-
-  const isCurated = (name: string): boolean =>
-    (CURATED_ITEMS as readonly string[]).includes(name);
+  // The most-traded items in the loaded dataset, by transaction count.
+  const visibleChips = useMemo(
+    () => topItemChips(items, VISIBLE_CHIP_COUNT),
+    [items],
+  );
 
   const isVisible = (name: string): boolean =>
     visibleChips.some((c) => c.name === name);
 
-  // If the active item is non-curated OR a curated item that didn't make the
-  // top-N visible chips, render it as a temporary "pinned" chip with × so
-  // the user can clear back to the default. This way the active selection
+  // If the active item didn't make the top-N visible chips (picked via
+  // search), render it as a temporary "pinned" chip with × so the user can
+  // clear back to the default. This way the active selection
   // is always visible somewhere in the chip row.
   const activePinned =
     !isVisible(value) && itemsByName.get(value) ? itemsByName.get(value)! : null;
@@ -60,8 +52,8 @@ export function ItemChips({ items, value, onChange }: Props) {
           active
           onClick={() => onChange(activePinned.name)}
           dismissible
-          onDismiss={() => onChange("Arcane Dust")}
-          showCuratedBadge={!isCurated(activePinned.name)}
+          onDismiss={defaultItem ? () => onChange(defaultItem) : undefined}
+          showSearchBadge
         />
       )}
       <ItemSearchInput items={items} value={value} onChange={onChange} />
@@ -75,14 +67,14 @@ function Chip({
   onClick,
   dismissible,
   onDismiss,
-  showCuratedBadge,
+  showSearchBadge,
 }: {
   item: ItemSummary;
   active: boolean;
   onClick: () => void;
   dismissible?: boolean;
   onDismiss?: () => void;
-  showCuratedBadge?: boolean;
+  showSearchBadge?: boolean;
 }) {
   return (
     <span
@@ -110,19 +102,19 @@ function Chip({
             DE
           </span>
         )}
-        {showCuratedBadge && !item.isSynthetic && (
+        {showSearchBadge && !item.isSynthetic && (
           <span className="rounded bg-[#333] px-1 py-0.5 text-[9px] uppercase tracking-wide text-[#999]">
             search
           </span>
         )}
       </button>
-      {dismissible && (
+      {dismissible && onDismiss && (
         <button
           type="button"
           aria-label={`Clear ${item.name} selection`}
           onClick={(e) => {
             e.stopPropagation();
-            onDismiss?.();
+            onDismiss();
           }}
           className="border-l border-[#5dcaa5]/40 px-2 py-1.5 text-[#5dcaa5] hover:bg-[#0e1916]"
         >

@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "wowahdata — TSM accounting dashboard";
+export const alt = "wowahdata — TSM accounting dashboard for WoW Forever";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -96,7 +96,7 @@ export default function OG() {
           ))}
         </div>
         <div style={{ fontSize: 18, color: "#5dcaa5" }}>
-          Drop your TSM CSVs · your data never leaves your browser
+          Drop your TSM Forever export · your data never leaves your browser
         </div>
       </div>
     ),

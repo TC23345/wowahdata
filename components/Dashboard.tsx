@@ -4,10 +4,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { LoadedData } from "@/lib/csv";
 import {
   aggregateItems,
+  defaultItem as pickDefaultItem,
   filterByDisplayName,
 } from "@/lib/items";
 import { weekStartTuesday, weekEndMonday } from "@/lib/weeks";
-import { CURATED_ITEMS, DEFAULT_ITEM } from "@/lib/curated";
 import { filterForItem, statsForItem } from "@/lib/transform";
 import { SaleHeatmap } from "@/components/heatmap/SaleHeatmap";
 import { ItemChips } from "@/components/controls/ItemChips";
@@ -136,6 +136,7 @@ function ReadyView({
   const [showUpload, setShowUpload] = useState(false);
 
   const items = useMemo(() => aggregateItems(data), [data]);
+  const defaultItem = useMemo(() => pickDefaultItem(items), [items]);
 
   const { fullStart, fullEnd } = useMemo(() => {
     let min = Infinity;
@@ -156,7 +157,11 @@ function ReadyView({
     };
   }, [data]);
 
-  const item = isKnownItem(items, params.item) ? params.item! : DEFAULT_ITEM;
+  // A ?item= that isn't in this realm's data (stale link, realm switch) falls
+  // back to the top seller instead of showing an empty dashboard.
+  const item = isKnownItem(items, params.item)
+    ? params.item!
+    : (defaultItem ?? "");
   const range = parseRange(params);
   const tab: Tab = isTab(params.tab) ? (params.tab as Tab) : "heatmap";
 
@@ -195,8 +200,9 @@ function ReadyView({
           <ItemChips
             items={items}
             value={item}
+            defaultItem={defaultItem}
             onChange={(next) =>
-              setParams({ item: next === DEFAULT_ITEM ? null : next })
+              setParams({ item: next === defaultItem ? null : next })
             }
           />
         </div>
@@ -443,7 +449,6 @@ function isKnownItem(
   name: string | null,
 ): boolean {
   if (!name) return false;
-  if ((CURATED_ITEMS as readonly string[]).includes(name)) return true;
   return items.some((i) => i.name === name);
 }
 

@@ -2,21 +2,21 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "wowahdata — TSM accounting dashboard",
+  title: "wowahdata — TSM accounting dashboard for WoW Forever",
   description:
-    "Drop your TradeSkillMaster CSVs and see when your auction house actually clears. Per-item sale heatmap, P&L, sell-through. Your data never leaves your browser.",
+    "Drop your TradeSkillMaster Forever Data Export and see when your auction house actually clears. Per-item sale heatmap, P&L, sell-through. Your data never leaves your browser.",
   applicationName: "wowahdata",
   openGraph: {
-    title: "wowahdata — TSM accounting dashboard",
+    title: "wowahdata — TSM accounting dashboard for WoW Forever",
     description:
-      "Drop your TradeSkillMaster CSVs and see when your auction house actually clears.",
+      "Drop your TradeSkillMaster Forever Data Export and see when your auction house actually clears.",
     type: "website",
     siteName: "wowahdata",
   },
   twitter: {
     card: "summary_large_image",
-    title: "wowahdata — TSM accounting dashboard",
-    description: "Drop your TSM CSVs · your data never leaves your browser.",
+    title: "wowahdata — TSM accounting dashboard for WoW Forever",
+    description: "Drop your TSM Forever export · your data never leaves your browser.",
   },
 };
 

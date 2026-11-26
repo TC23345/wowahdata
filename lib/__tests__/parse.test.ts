@@ -1,6 +1,4 @@
 import { describe, it, expect } from "vitest";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import {
   parseCashFlow,
   parseExpiredCanceled,
@@ -8,44 +6,35 @@ import {
   stripBom,
 } from "../parse";
 import { copperToGold } from "../csv";
-
-const FIX = "__fixtures__/nightslayer";
+import { readFixture } from "./fixture";
 
 describe("CSV parsing", () => {
-  it("parses purchases with 9 columns and produces 11526 data rows", () => {
-    const txt = readFileSync(join(FIX, "Accounting_Nightslayer_purchases.csv"), "utf8");
-    const rows = parsePurchaseSale(txt);
-    expect(rows.length).toBe(11526);
+  it("parses Buys with 9 columns and produces 220 data rows", () => {
+    const rows = parsePurchaseSale(readFixture("Buys").text);
+    expect(rows.length).toBe(220);
     expect(rows[0].itemString).toMatch(/^i:/);
     expect(typeof rows[0].time).toBe("number");
   });
 
-  it("parses sales and produces 8511 data rows", () => {
-    const txt = readFileSync(join(FIX, "Accounting_Nightslayer_sales.csv"), "utf8");
-    const rows = parsePurchaseSale(txt);
-    expect(rows.length).toBe(8511);
+  it("parses Sales and produces 305 data rows", () => {
+    expect(parsePurchaseSale(readFixture("Sales").text).length).toBe(305);
   });
 
-  it("parses expired (327) and canceled (242)", () => {
-    const exp = parseExpiredCanceled(
-      readFileSync(join(FIX, "Accounting_Nightslayer_expired.csv"), "utf8"),
-    );
-    const can = parseExpiredCanceled(
-      readFileSync(join(FIX, "Accounting_Nightslayer_canceled.csv"), "utf8"),
-    );
-    expect(exp.length).toBe(327);
-    expect(can.length).toBe(242);
+  it("parses Expired (32) and Cancelled (32)", () => {
+    expect(parseExpiredCanceled(readFixture("Expired").text).length).toBe(32);
+    expect(parseExpiredCanceled(readFixture("Cancelled").text).length).toBe(32);
   });
 
-  it("parses income (17) and expenses (279)", () => {
-    const inc = parseCashFlow(
-      readFileSync(join(FIX, "Accounting_Nightslayer_income.csv"), "utf8"),
-    );
-    const exp = parseCashFlow(
-      readFileSync(join(FIX, "Accounting_Nightslayer_expenses.csv"), "utf8"),
-    );
-    expect(inc.length).toBe(17);
-    expect(exp.length).toBe(279);
+  it("parses Income (6) and Expense (20)", () => {
+    expect(parseCashFlow(readFixture("Income").text).length).toBe(6);
+    expect(parseCashFlow(readFixture("Expense").text).length).toBe(20);
+  });
+
+  it("time is Unix seconds UTC inside the fixture's four Tue–Mon weeks", () => {
+    const rows = parsePurchaseSale(readFixture("Sales").text);
+    const start = Date.UTC(2026, 9, 27) / 1000; // Tue 2026-10-27
+    const end = Date.UTC(2026, 10, 24) / 1000; // Tue 2026-11-24
+    expect(rows.every((r) => r.time >= start && r.time < end)).toBe(true);
   });
 
   it("price is copper per unit — 64092 copper → 6.4092 gold", () => {
