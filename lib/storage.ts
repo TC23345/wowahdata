@@ -5,6 +5,8 @@ import type { LoadedData } from "./csv";
 
 const KEY_PREFIX = "wowahdata:realm:";
 const ACTIVE_REALM_KEY = "wowahdata:active-realm";
+// Folder handle remembered by "Detect TSM export" (lib/folder-detect.ts).
+export const EXPORT_FOLDER_KEY = "wowahdata:export-folder";
 
 function realmKey(realm: string): string {
   return `${KEY_PREFIX}${realm}`;
@@ -39,4 +41,6 @@ export async function clearAllData(): Promise<void> {
   const realms = await listRealms();
   await Promise.all(realms.map((r) => del(realmKey(r))));
   await del(ACTIVE_REALM_KEY);
+  // Also forget the folder remembered by "Detect TSM export".
+  await del(EXPORT_FOLDER_KEY);
 }

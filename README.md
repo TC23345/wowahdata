@@ -32,7 +32,11 @@ wowahdata reads only the **TSM desktop app's Data Export** for Game Mode **Forev
    TSM_<Realm>_Expense_<YYYY-MM-DD>.csv
    ```
 
-3. Unzip, then drop any subset into the upload zone. The realm comes from the filename; multiple realms are supported via a switcher, one realm per upload.
+3. Load it, either way:
+   - **Detect TSM export** (Chrome / Edge): opens a folder picker that starts on your Desktop (Windows, macOS, Linux). Confirm the folder once; later clicks rescan it and load the newest export set, loose CSVs or a `TSM*.zip`. The folder is remembered in your browser (forgotten by *Clear all data*) and files are only read locally.
+   - **Drag and drop** (any browser): drop the `.zip` or any subset of the CSVs.
+
+   The realm comes from the filename; multiple realms are supported via a switcher, one realm per upload.
 
 The files start with a UTF-8 byte-order mark, which the parser strips. The dashboard opens on whichever item sold the most units in your data.
 
@@ -54,7 +58,7 @@ The test data in `__fixtures__/forever/` is a synthetic Forever Data Export (rea
 - React 19
 - Tailwind CSS v4 (CSS-first via `@theme`)
 - visx for the heatmap, Chart.js for the rest
-- PapaParse + idb-keyval
+- PapaParse + idb-keyval, fflate for zipped exports
 - Vitest + Testing Library
 
 ## License

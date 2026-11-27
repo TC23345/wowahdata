@@ -6,7 +6,7 @@ import type { TsmKind } from "./csv";
 // Realm names can contain letters, digits, spaces, apostrophes, and hyphens
 // (e.g. PvP, Mal'Ganis, Earthen Ring, Area-52).
 const DESKTOP_RE =
-  /^TSM_([A-Za-z0-9'\- ]+)_(Sales|Buys|Cancelled|Expired|Income|Expense)_\d{4}-\d{2}-\d{2}\.csv$/;
+  /^TSM_([A-Za-z0-9'\- ]+)_(Sales|Buys|Cancelled|Expired|Income|Expense)_(\d{4}-\d{2}-\d{2})\.csv$/;
 
 const DESKTOP_KIND: Record<string, TsmKind> = {
   Sales: "sales",
@@ -20,9 +20,16 @@ const DESKTOP_KIND: Record<string, TsmKind> = {
 export const ACCEPTED_FILENAME_PATTERN = "TSM_<Realm>_<Kind>_<YYYY-MM-DD>.csv";
 
 export type RealmFile = { realm: string; kind: TsmKind };
+export type ExportFile = RealmFile & { date: string };
 
-export function realmFromFilename(name: string): RealmFile | null {
+// Full parse of a Data Export filename, including its YYYY-MM-DD stamp.
+export function parseExportFilename(name: string): ExportFile | null {
   const m = DESKTOP_RE.exec(name);
   if (!m) return null;
-  return { realm: m[1], kind: DESKTOP_KIND[m[2]] };
+  return { realm: m[1], kind: DESKTOP_KIND[m[2]], date: m[3] };
+}
+
+export function realmFromFilename(name: string): RealmFile | null {
+  const f = parseExportFilename(name);
+  return f && { realm: f.realm, kind: f.kind };
 }
